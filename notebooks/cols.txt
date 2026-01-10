@@ -54,6 +54,7 @@ actors
 actress
 acts
 acupuncture
+ad
 adams
 add
 added
@@ -97,6 +98,7 @@ afp
 africa
 african
 aftershocks
+ag
 agassi
 age
 aged
@@ -137,6 +139,7 @@ airs
 airstrike
 airwaves
 airways
+al
 alabama
 alarm
 alaska
@@ -224,6 +227,7 @@ antidepressants
 antitrust
 anwar
 aol
+ap
 apart
 apartment
 apec
@@ -342,6 +346,7 @@ attendants
 attention
 attorney
 attorneys
+au
 auburn
 auction
 auctions
@@ -381,6 +386,7 @@ awards
 away
 axe
 aziz
+ba
 babies
 baby
 backed
@@ -452,6 +458,7 @@ bay
 bayer
 bayern
 bbc
+bc
 bcs
 bea
 beach
@@ -650,6 +657,7 @@ boxing
 boy
 boycott
 boys
+bp
 brace
 braced
 braces
@@ -717,6 +725,7 @@ bruins
 brussels
 brutal
 bryant
+bt
 bubble
 buck
 buckeyes
@@ -768,6 +777,7 @@ buys
 buzz
 bypass
 byrd
+ca
 cabinet
 cable
 cafes
@@ -874,6 +884,7 @@ cautious
 cavaliers
 cavs
 cbs
+cd
 cdc
 cds
 cease
@@ -1346,6 +1357,7 @@ cyclone
 cyprus
 czar
 czech
+da
 dad
 daily
 daimler
@@ -1384,6 +1396,7 @@ davidson
 davis
 day
 days
+dc
 dead
 deadline
 deadlock
@@ -1657,6 +1670,7 @@ downs
 downtown
 dozen
 dozens
+dr
 draft
 drag
 drags
@@ -1685,6 +1699,7 @@ drug
 drugs
 drunk
 dry
+ds
 dual
 dubai
 duck
@@ -1705,6 +1720,7 @@ dvd
 dvds
 dying
 dylan
+ea
 eads
 eager
 eagle
@@ -1733,6 +1749,7 @@ eat
 eating
 ebay
 ebersol
+ec
 ecb
 ecclestone
 eclipse
@@ -1741,6 +1758,7 @@ economic
 economies
 economy
 ecuador
+ed
 edge
 edges
 edition
@@ -1762,6 +1780,7 @@ egyptian
 egyptians
 eighth
 eisner
+el
 elbaradei
 elderly
 elect
@@ -1779,6 +1798,7 @@ elizabeth
 els
 elton
 elusive
+em
 email
 embargo
 embassy
@@ -1801,6 +1821,7 @@ employed
 employee
 employees
 employers
+en
 end
 endangered
 ending
@@ -1859,6 +1880,7 @@ ethical
 ethics
 ethiopia
 ethnic
+eu
 euro
 euronext
 europe
@@ -1880,6 +1902,7 @@ everybody
 evidence
 evil
 evolution
+ex
 exam
 examine
 exceeds
@@ -1944,6 +1967,8 @@ eye
 eyed
 eyeing
 eyes
+f1
+fa
 face
 facebook
 faced
@@ -2053,6 +2078,7 @@ festive
 feud
 fever
 fewer
+fi
 fiasco
 fiat
 fiber
@@ -2152,6 +2178,7 @@ flu
 fly
 flyers
 flying
+fm
 focus
 focuses
 foes
@@ -2225,6 +2252,7 @@ frist
 frontier
 frozen
 fruit
+ft
 ftc
 ftse
 fuel
@@ -2242,6 +2270,9 @@ funeral
 fury
 future
 futures
+g7
+g8
+ga
 gadget
 gadgets
 gaffe
@@ -2276,7 +2307,9 @@ gays
 gaza
 gazans
 gazprom
+gb
 gdp
+ge
 gear
 gears
 geek
@@ -2306,6 +2339,7 @@ getting
 ghana
 ghost
 ghraib
+gi
 giambi
 giant
 giants
@@ -2336,6 +2370,7 @@ gloom
 glory
 glow
 glut
+gm
 goal
 goals
 god
@@ -2363,6 +2398,7 @@ governments
 governor
 governors
 govt
+gp
 gps
 grab
 grabs
@@ -2498,6 +2534,7 @@ hawaii
 hawks
 hazard
 hbo
+hd
 hdtv
 head
 headache
@@ -2552,6 +2589,7 @@ hewitt
 hewlett
 hey
 hezbollah
+hi
 hidden
 hide
 hiding
@@ -2583,6 +2621,7 @@ hitler
 hits
 hitting
 hiv
+hk
 hoax
 hobbit
 hockey
@@ -2646,7 +2685,10 @@ housing
 houston
 howard
 hoyas
+hp
+hq
 hsbc
+hu
 hub
 hubble
 huckabee
@@ -2690,6 +2732,7 @@ ice
 iceland
 icon
 icy
+id
 idaho
 idea
 ideas
@@ -2697,11 +2740,13 @@ identified
 identify
 identity
 idol
+ii
 iii
 ill
 illegal
 illinois
 illness
+im
 imac
 image
 images
@@ -2837,6 +2882,7 @@ invites
 involved
 ioc
 iowa
+ip
 iphone
 iphones
 ipo
@@ -2955,6 +3001,7 @@ journalist
 journalists
 journey
 joy
+jr
 jude
 judge
 judges
@@ -3057,8 +3104,10 @@ kurdish
 kurds
 kuwait
 kuznetsova
+ky
 kyi
 kyoto
+la
 lab
 label
 labels
@@ -3170,6 +3219,7 @@ letters
 level
 levels
 lewis
+lg
 lib
 libby
 libel
@@ -3227,6 +3277,7 @@ liver
 liverpool
 lives
 living
+ll
 loan
 loans
 lobby
@@ -3412,6 +3463,7 @@ mcdonald
 mci
 mclaren
 mclennan
+md
 mean
 means
 measure
@@ -3535,6 +3587,7 @@ mixed
 mlb
 mln
 mmo2
+mo
 mob
 mobile
 mobiles
@@ -3606,9 +3659,12 @@ movies
 moving
 moya
 mozilla
+mp
 mp3
 mpaa
 mps
+mr
+ms
 msn
 mtv
 mubarak
@@ -3716,8 +3772,10 @@ newspaper
 nextel
 nfc
 nfl
+nh
 nhl
 nhs
+ni
 nice
 nicole
 nielsen
@@ -3736,7 +3794,9 @@ nip
 nissan
 nistelrooy
 nixes
+nj
 nkorea
+nl
 nobel
 nod
 nods
@@ -3781,9 +3841,11 @@ nurse
 nurses
 nursing
 nvidia
+ny
 nyc
 nyse
 nyt
+nz
 oakland
 obama
 obese
@@ -3815,8 +3877,10 @@ officially
 officials
 offline
 offshore
+oh
 ohio
 oil
+ok
 oklahoma
 oks
 old
@@ -3828,6 +3892,7 @@ olympic
 olympics
 ones
 online
+op
 opec
 open
 opened
@@ -3866,10 +3931,12 @@ original
 orioles
 orleans
 ortiz
+os
 osama
 osbourne
 oscar
 oscars
+ot
 ottawa
 oust
 ousted
@@ -3899,6 +3966,7 @@ owners
 ownership
 ozzy
 p2p
+pa
 pace
 pacers
 pacific
@@ -3990,6 +4058,7 @@ payments
 payout
 paypal
 pays
+pc
 pcs
 pct
 peace
@@ -4130,6 +4199,7 @@ plug
 plunge
 plunges
 plus
+pm
 pocket
 podcast
 poet
@@ -4349,10 +4419,15 @@ pushing
 putin
 puts
 putting
+q1
+q2
+q3
+q4
 qaeda
 qaida
 qantas
 qatar
+qb
 qtr
 quake
 quakes
@@ -4780,6 +4855,7 @@ rwandan
 ryan
 ryanair
 ryder
+sa
 saban
 sabotage
 sabres
@@ -4834,6 +4910,7 @@ saw
 say
 says
 sbc
+sc
 scale
 scam
 scams
@@ -5040,6 +5117,7 @@ shut
 shutdown
 shuts
 shuttle
+si
 sick
 sicko
 sidelined
@@ -5269,6 +5347,7 @@ squad
 square
 squeeze
 sri
+st
 stabbed
 stabbing
 stability
@@ -5556,6 +5635,8 @@ tata
 tax
 taxes
 taylor
+tb
+td
 tea
 teach
 teacher
@@ -5680,6 +5761,7 @@ titan
 titans
 title
 tivo
+tm
 tobacco
 today
 toddler
@@ -5819,6 +5901,7 @@ trust
 truth
 try
 trying
+ts
 tsunami
 tsunamis
 tsvangirai
@@ -5843,6 +5926,7 @@ turning
 turnout
 turns
 tussle
+tv
 tvs
 twice
 twin
@@ -5852,6 +5936,7 @@ tycoon
 tyler
 type
 typhoon
+u2
 uae
 uaw
 ubs
@@ -5860,6 +5945,7 @@ uconn
 uefa
 uganda
 ugly
+uk
 ukraine
 ukrainian
 ukrainians
@@ -5941,6 +6027,7 @@ using
 utah
 utd
 utility
+va
 vaccine
 vaccines
 valencia
@@ -5952,6 +6039,7 @@ van
 variety
 vatican
 vaughan
+ve
 vegas
 vehicle
 vehicles
@@ -6032,8 +6120,11 @@ votes
 voting
 vow
 vows
+vp
+vs
 vulnerability
 vulnerable
+vw
 wade
 wage
 wages
@@ -6124,6 +6215,7 @@ wheels
 whistle
 white
 wholesale
+wi
 wide
 widens
 wider
@@ -6225,6 +6317,8 @@ wwii
 wyeth
 x27
 xbox
+xm
+xp
 yahoo
 yankees
 yanks
