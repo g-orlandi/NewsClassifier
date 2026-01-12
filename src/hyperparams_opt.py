@@ -13,26 +13,18 @@ model-performance functions passed as callables.
 """
 
 import optuna
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
+import numpy as np
 
-from config import *
+from .config import *
 
 # ============================================================================
 #                 MODEL-SPECIFIC HYPERPARAMETER CONFIGURATION
 # ============================================================================
 
-def get_models_optuna_config(n_samples, n_features, SEED=42):
+def get_models_optuna_config(version=0):
     """
     Return the hierarchical Optuna search space for all models.
-
-    Parameters
-    ----------
-    n_samples : int
-        Number of samples in the dataset.
-    n_features : int
-        Number of input features.
-    SEED : int
-        Random seed for reproducibility at model level.
 
     Returns
     -------
@@ -40,63 +32,89 @@ def get_models_optuna_config(n_samples, n_features, SEED=42):
         A nested dictionary specifying parameter types and ranges
         for each model under 'clf' and 'regr'.
     """
-    return {
-        "clf": {
-            "knn": {
-                "n_neighbors": {
-                    "range": (3, min(100, max(3, int(0.2 * n_samples)))),
-                    "type": "int"
-                }
-            },
-            "decision_tree": {
-                "min_samples_leaf": {"range": (0.01, 0.3), "type": "float"},
-                "criterion": {"range": ["gini", "entropy"], "type": "categorical"},
-                "max_depth": {"range": (2, max(2, n_features / 2)), "type": "int"},
-                "random_state": {"fixed": SEED},
-            },
+    if version == 0:
+        return {
             "logistic_regression": {
-                "solver": {"range": ["lbfgs", "newton-cholesky"], "type": "categorical"},
-                "C": {"range": (0.01, 10.0), "type": "logfloat"},
-                "penalty": {"range": ["l2", None], "type": "categorical"},
-                "max_iter": {"fixed": 1000},
-                "random_state": {"fixed": SEED},
+                "solver": {"fixed": "saga"},
+                "l1_ratio": {"fixed": 0},
+                "C": {"range": (0.1, 10.0), "type": "logfloat"},
+                "max_iter": {"fixed": 5000},
             },
-            "gosdt": {
-                "GDBT_n_estimators": {"range": (20, 40), "type": "int"},
-                "GDBT_max_depth": {"range": (2, 6), "type": "int"},
-                "GDBT_random_state": {"fixed": SEED},
-                "GOSDT_regularization": {"range": (0.01, 0.2), "type": "logfloat"},
-                "GOSDT_similar_support": {"range": [False, True], "type": "categorical"},
-                "GOSDT_allow_small_reg": {"fixed": True},
-                "GOSDT_time_limit": {"fixed": 120},
-                "GOSDT_depth_budget": {"range": (2, 20), "type": "int"},
-            },
+
             "naive_bayes": {
-                "var_smoothing": {"range": (1e-12, 1e-6), "type": "logfloat"}
+                "alpha": {"range": (0.1, 5.0), "type": "logfloat"}
             },
-            "ebm": {
-                "interactions": {"range": (0, 3), "type": "int"},
-                "learning_rate": {"range": (0.01, 0.05), "type": "logfloat"},
-                "max_rounds": {"range": (100, 200), "type": "int"},
-                "min_samples_leaf": {"range": (2, 5), "type": "int"},
+
+            "linear_svm": {
+                "C": {"range": (0.1, 10.0), "type": "logfloat"},
+                "max_iter": {"fixed": 5000}
+            },
+
+            "xgboost": {
+                "objective": {"fixed": "multi:softprob"},
+                "num_class": {"fixed": 7},
+                "eval_metric": {"fixed": "mlogloss"},
+                "tree_method": {"fixed": "hist"},
                 "n_jobs": {"fixed": -1},
-                "random_state": {"fixed": SEED},
-            },
-            "igann": {
-                "n_hid": {"range": (5, 50), "type": "int"},
-                "n_estimators": {"range": (100, 5000), "type": "int"},
-                "boost_rate": {"range": (0.001, 0.5), "type": "float"},
-                "random_state": {"fixed": SEED},
-            },
+
+                # pochi parametri davvero influenti
+                "learning_rate": {"range": (0.05, 0.2), "type": "logfloat"},
+                "n_estimators": {"range": [300, 500, 800], "type": "categorical"},
+                "max_depth": {"range": (3, 5), "type": "int"},
+                "min_child_weight": {"range": (1, 5), "type": "int"},
+
+                # fissi per baseline
+                "subsample": {"fixed": 0.8},
+                "colsample_bytree": {"fixed": 0.6},
+                "gamma": {"fixed": 0.0},
+                "reg_alpha": {"fixed": 0.0},
+                "reg_lambda": {"fixed": 1.0},
+            }
         }
-    }
+    if version == 1:
+
+        return {
+                "logistic_regression": {
+                    "solver": {"fixed": "saga"},
+                    "C": {"range": (0.01, 10.0), "type": "logfloat"},
+                    "l1_ratio": {"range": [0, 1], "type": "categorical"},
+                    "max_iter": {"fixed": 10000},
+                },
+                "naive_bayes": {
+                    "alpha": {"range": (1e-3, 10.0), "type": "logfloat"}
+                },
+                "xgboost": {
+                    "objective": {"fixed": "multi:softprob"},
+                    "num_class": {"fixed": 7},
+                    "tree_method": {"fixed": "hist"},
+                    "n_jobs": {"fixed": -1},
+
+                    "learning_rate": {"range": (0.03, 0.15), "type": "logfloat"},
+                    "n_estimators": {"range": [300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1100, 1200], "type": "categorical"},
+
+                    "max_depth": {"range": (3, 6), "type": "int"},
+                    "min_child_weight": {"range": (1, 8), "type": "int"},
+
+                    "subsample": {"range": (0.7, 1.0), "type": "float"},
+                    "colsample_bytree": {"range": (0.3, 0.9), "type": "float"},
+
+                    "gamma": {"range": (0.0, 0.7), "type": "float"},
+                    "reg_alpha": {"range": (0.0, 1.5), "type": "float"},
+                    "reg_lambda": {"range": (0.8, 4.0), "type": "float"},
+                },
+                "linear_svm": {
+                    "C": {"range": (0.05, 10.0), "type": "logfloat"},
+                    "max_iter": {"fixed": 5000}
+                }
+
+        }
 
 
 # ============================================================================
 #                           OPTUNA OPTIMIZATION LOGIC
 # ============================================================================
 
-def optuna_hyp_opt(model, problem, function, X, y):
+def optuna_hyp_opt(model, function, X, y):
     """
     Run Optuna hyperparameter optimization using the model-specific search space.
 
@@ -104,8 +122,6 @@ def optuna_hyp_opt(model, problem, function, X, y):
     ----------
     model : str
         Model identifier (e.g., 'knn', 'ebm', 'symbolic_regression').
-    problem : {'clf', 'regr'}
-        Specifies task type.
     function : callable
         A function with signature f(params, X_train, X_val, y_train, y_val)
         returning a score dictionary.
@@ -121,9 +137,7 @@ def optuna_hyp_opt(model, problem, function, X, y):
     def objective(trial):
         # Construct parameter dictionary from config
         params = {}
-        param_config = get_models_optuna_config(
-            X.shape[0], X.shape[1]
-        )[problem][model]
+        param_config = get_models_optuna_config()[model]
 
         for key, cfg in param_config.items():
             if "fixed" in cfg:
@@ -156,21 +170,27 @@ def optuna_hyp_opt(model, problem, function, X, y):
                 )
 
         # Train/validation split
-        Xtr, Xval, ytr, yval = train_test_split(X, y, test_size=OPT_SINGLE_TEST_SIZE, random_state=SEED, stratify=y)
 
-        # Evaluate
-        score_dict = function(params, Xtr, Xval, ytr, yval)
+        cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True)
 
-        score = score_dict["Fbeta"] 
+        scores = []
+        for tr_idx, val_idx in cv.split(X, y):
+            Xtr = X.iloc[tr_idx] if hasattr(X, "iloc") else X[tr_idx]
+            Xval = X.iloc[val_idx] if hasattr(X, "iloc") else X[val_idx]
+            ytr = y.iloc[tr_idx] if hasattr(y, "iloc") else y[tr_idx]
+            yval = y.iloc[val_idx] if hasattr(y, "iloc") else y[val_idx]
+            score_dict = function(params, Xtr, Xval, ytr, yval)
+            scores.append(score_dict["f1-macro"])
 
         trial.set_user_attr("full_params", params)
-        return score
+
+        return float(np.mean(scores))
 
     optuna.logging.set_verbosity(optuna.logging.ERROR)
 
     study = optuna.create_study(
         direction="maximize",
-        sampler=optuna.samplers.TPESampler(seed=SEED)
+        sampler=optuna.samplers.TPESampler()
     )
 
     study.optimize(objective, n_trials=OPTUNA_TRIALS, show_progress_bar=True)

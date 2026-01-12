@@ -1,1 +1,0 @@
-My first approach is an approach that leverage on the full-text-search tools (TF-IDF, etc...) to build features and then use classifier.

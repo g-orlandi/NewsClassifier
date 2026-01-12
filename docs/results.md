@@ -1,0 +1,9 @@
+- BaselineV1
+  - The first baseline i
+  - Features: 
+    - Time: dayofweek, month, hour, year; NaN managed with placeholder 1970-01-01 00:00:00
+    - Source: OHE keeping only the top 50 most frequent sources (even the NaN one); all 0s for other sources
+    - Title: TF-IDF vectorizer with min_df=10, stop_words='english'; removed tokens with only numbers and with len <= 2
+    - Article: not used
+    - Page-Rank: used as it is
+  - Hyperparams-grid: version 0, with OPTUNA_TRIALS = 10, OPTUNA_KSPLITS = 3
