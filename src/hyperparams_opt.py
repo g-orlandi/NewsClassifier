@@ -17,12 +17,13 @@ from sklearn.model_selection import StratifiedKFold
 import numpy as np
 
 from .config import *
+from .preprocessing import Preprocessor
 
 # ============================================================================
 #                 MODEL-SPECIFIC HYPERPARAMETER CONFIGURATION
 # ============================================================================
 
-def get_models_optuna_config(version=0):
+def get_models_optuna_config(version):
     """
     Return the hierarchical Optuna search space for all models.
 
@@ -114,7 +115,7 @@ def get_models_optuna_config(version=0):
 #                           OPTUNA OPTIMIZATION LOGIC
 # ============================================================================
 
-def optuna_hyp_opt(model, function, X, y):
+def optuna_hyp_opt(model, function, X, y, version):
     """
     Run Optuna hyperparameter optimization using the model-specific search space.
 
@@ -137,7 +138,7 @@ def optuna_hyp_opt(model, function, X, y):
     def objective(trial):
         # Construct parameter dictionary from config
         params = {}
-        param_config = get_models_optuna_config()[model]
+        param_config = get_models_optuna_config(version)[model]
 
         for key, cfg in param_config.items():
             if "fixed" in cfg:
@@ -171,7 +172,7 @@ def optuna_hyp_opt(model, function, X, y):
 
         # Train/validation split
 
-        cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True)
+        cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True, random_state=True)
 
         scores = []
         for tr_idx, val_idx in cv.split(X, y):
@@ -179,7 +180,18 @@ def optuna_hyp_opt(model, function, X, y):
             Xval = X.iloc[val_idx] if hasattr(X, "iloc") else X[val_idx]
             ytr = y.iloc[tr_idx] if hasattr(y, "iloc") else y[tr_idx]
             yval = y.iloc[val_idx] if hasattr(y, "iloc") else y[val_idx]
+
+
+            prep = Preprocessor()
+
+            Xtr, idxs = prep.fit(Xtr.copy())
+            ytr = ytr.loc[idxs]
+
+            Xval, idxs = prep.fit_transform(Xval.copy())
+            yval = yval.loc[idxs]
+
             score_dict = function(params, Xtr, Xval, ytr, yval)
+
             scores.append(score_dict["f1-macro"])
 
         trial.set_user_attr("full_params", params)
