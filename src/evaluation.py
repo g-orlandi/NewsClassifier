@@ -6,7 +6,7 @@ import time
 from . config import *
 from .preprocessing import *
 from .utils import load_data
-from . import models
+from .models import train_model
 from .hyperparams_opt import optuna_hyp_opt
 
 def evaluate(models_name=['logistic_regression', 'naive_bayes', 'xgboost', 'linear_svm'], version=0):
@@ -36,18 +36,12 @@ def evaluate(models_name=['logistic_regression', 'naive_bayes', 'xgboost', 'line
 
     for model_name in models_name:
         start = time.time()
-        function_name = model_name + "_performances"
-
-        function = getattr(models, function_name)
 
         # TO-DO: eventually scale
 
-        hyperparams = optuna_hyp_opt(model_name, function, Xtr_val, ytr_val, version)
+        hyperparams = optuna_hyp_opt(model_name, Xtr_val, ytr_val, version)
 
-        result = function(
-            hyperparams, 
-            Xtr_val_prep, X_test_prep, ytr_val_prep, y_test_prep
-        )
+        result = train_model(model_name, hyperparams, Xtr_val_prep, X_test_prep, ytr_val_prep, y_test_prep)
 
         end = time.time()
 
@@ -73,13 +67,9 @@ def produce_submissions(model_name, hyperparams, output_filename):
 
     X_test, idxs = prep.fit_transform(evaluation.copy())
 
-    function_name = model_name + "_performances"
-    function = getattr(models, function_name)
 
-    y_pred = function(
-        hyperparams, 
-        X_train, X_test, y_train, y_test=None, submission=True
-    )
+    y_pred = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test=None, submission=True)
+    
     submission_df = pd.DataFrame(
         {
             "Id": idxs,

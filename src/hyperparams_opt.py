@@ -18,6 +18,7 @@ import numpy as np
 
 from .config import *
 from .preprocessing import Preprocessor
+from .models import train_model
 
 # ============================================================================
 #                 MODEL-SPECIFIC HYPERPARAMETER CONFIGURATION
@@ -115,7 +116,7 @@ def get_models_optuna_config(version):
 #                           OPTUNA OPTIMIZATION LOGIC
 # ============================================================================
 
-def optuna_hyp_opt(model, function, X, y, version):
+def optuna_hyp_opt(model, X, y, version):
     """
     Run Optuna hyperparameter optimization using the model-specific search space.
 
@@ -190,7 +191,7 @@ def optuna_hyp_opt(model, function, X, y, version):
             Xval, idxs = prep.fit_transform(Xval.copy())
             yval = yval.loc[idxs]
 
-            score_dict = function(params, Xtr, Xval, ytr, yval)
+            score_dict = train_model(model, params, Xtr, Xval, ytr, yval)
 
             scores.append(score_dict["f1-macro"])
 

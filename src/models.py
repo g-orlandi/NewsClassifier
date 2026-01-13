@@ -18,7 +18,9 @@ the paper.
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 import xgboost as xgb
 from sklearn.metrics import f1_score
-import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import ComplementNB
+from sklearn.svm import LinearSVC
 
 # ============================================================================
 #                            METRIC COMPUTATION
@@ -50,8 +52,6 @@ def classification_metric(y_true, y_pred):
         y_true, y_pred, average='macro', zero_division=True
     )
 
-
-
     accuracy = accuracy_score(y_true, y_pred)
 
     results = {
@@ -64,56 +64,24 @@ def classification_metric(y_true, y_pred):
 
     return results
 
-
 # ============================================================================
 #                              MODEL WRAPPERS
 # ============================================================================
 
-
-def logistic_regression_performances(hyperparams, X_train, X_test, y_train, y_test, submission=False):
-    """Train and evaluate Logistic Regression."""
-    from sklearn.linear_model import LogisticRegression
-
-    model = LogisticRegression(**hyperparams).fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    if submission:
-        return y_pred
-    return classification_metric(y_test, y_pred)
-
-# ============================================================================
-#                               NAIVE BAYES
-# ============================================================================
-
-def naive_bayes_performances(hyperparams, X_train, X_test, y_train, y_test, submission=False):
-    """Train and evaluate Complement Naive Bayes"""
-    from sklearn.naive_bayes import ComplementNB
-
-    model = ComplementNB(**hyperparams).fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    if submission:
-        return y_pred
-    return classification_metric(y_test, y_pred)
-
-# ============================================================================
-#                                XGBOOST
-# ============================================================================
-
-def xgboost_performances(hyperparams, X_train, X_test, y_train, y_test, submission=False):
-    model = xgb.XGBClassifier(**hyperparams)
-    y_tr = y_train.to_numpy() if hasattr(y_train, "to_numpy") else y_train
-    model.fit(X_train, y_tr)
+def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submission=False):
+    match model_name:
+        case 'logistic_regression':
+            model = LogisticRegression(**hyperparams).fit(X_train, y_train)
+        case 'naive_bayes':
+            model = ComplementNB(**hyperparams).fit(X_train, y_train)
+        case 'xgboost':
+            model = xgb.XGBClassifier(**hyperparams)
+        case 'linear_svm':
+            model = LinearSVC(**hyperparams).fit(X_train, y_train)
+        case _:
+            raise RuntimeError(f'{model_name} is not a valid model name.')
 
     y_pred = model.predict(X_test)
-    if submission:
-        return y_pred
-    return classification_metric(y_test, y_pred)
-
-
-def linear_svm_performances(hyperparams, X_train, X_test, y_train, y_test, submission=False):
-    from sklearn.svm import LinearSVC
-    model = LinearSVC(**hyperparams).fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-
     if submission:
         return y_pred
     return classification_metric(y_test, y_pred)

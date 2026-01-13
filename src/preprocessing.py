@@ -19,7 +19,6 @@ class Preprocessor:
         self.title_cols_to_keep_idxs = []
 
 
-
     def timestamp_management(self): 
         null_timestamp_idxs = self.df[self.df['timestamp'] == '0000-00-00 00:00:00'].index 
         self.df.loc[null_timestamp_idxs, 'timestamp'] = '1970-01-01 00:00:00' 
