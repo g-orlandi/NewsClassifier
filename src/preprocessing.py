@@ -18,15 +18,42 @@ class Preprocessor:
         self.top_50 = None
         self.title_cols_to_keep_idxs = []
 
+    def timestamp_management(self):
+        # 1) Parse timestamp: treat invalid placeholders as missing (NaT)
+        ts = self.df["timestamp"].replace("0000-00-00 00:00:00", pd.NA)
+        ts = pd.to_datetime(ts, errors="coerce")  # invalid -> NaT
+        self.df["timestamp"] = ts
 
-    def timestamp_management(self): 
-        null_timestamp_idxs = self.df[self.df['timestamp'] == '0000-00-00 00:00:00'].index 
-        self.df.loc[null_timestamp_idxs, 'timestamp'] = '1970-01-01 00:00:00' 
-        self.df['timestamp'] = pd.to_datetime(self.df['timestamp']) 
-        self.df['dayofweek'] = self.df['timestamp'].dt.day_of_week 
-        self.df['month'] = self.df['timestamp'].dt.month 
-        self.df['hour'] = self.df['timestamp'].dt.hour 
-        self.df['year'] = self.df['timestamp'].dt.year 
+        # 2) Missingness flag (important!)
+        self.df["timestamp_missing"] = self.df["timestamp"].isna().astype(int)
+
+        # 3) Create time features ONLY where timestamp is valid
+        valid = self.df["timestamp"].notna()
+
+        # is_weekend: keep as 0/1; set to 0 for missing (or leave NaN if you prefer)
+        self.df["is_weekend"] = 0
+        self.df.loc[valid, "is_weekend"] = (
+            self.df.loc[valid, "timestamp"].dt.day_of_week.isin([5, 6]).astype(int)
+        )
+
+        # hour sin/cos
+        self.df["hour_sin"] = 0.0
+        self.df["hour_cos"] = 0.0
+        h = self.df.loc[valid, "timestamp"].dt.hour.astype(float)
+        self.df.loc[valid, "hour_sin"] = np.sin(2 * np.pi * h / 24)
+        self.df.loc[valid, "hour_cos"] = np.cos(2 * np.pi * h / 24)
+
+        # month sin/cos
+        self.df["month_sin"] = 0.0
+        self.df["month_cos"] = 0.0
+        m = self.df.loc[valid, "timestamp"].dt.month.astype(float)
+        self.df.loc[valid, "month_sin"] = np.sin(2 * np.pi * m / 12)
+        self.df.loc[valid, "month_cos"] = np.cos(2 * np.pi * m / 12)
+
+        # year (numeric): set to -1 for missing (or keep NaN)
+        self.df["year"] = -1
+        self.df.loc[valid, "year"] = self.df.loc[valid, "timestamp"].dt.year.astype(int)
+
 
     def na_management(self): 
         null_title_idx = self.df[self.df['title'].isna()].index 

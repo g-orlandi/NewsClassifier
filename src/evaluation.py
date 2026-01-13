@@ -3,7 +3,7 @@ from scipy import sparse
 import pandas as pd
 import time
 
-from . config import *
+from .config import *
 from .preprocessing import *
 from .utils import load_data
 from .models import train_model
@@ -69,7 +69,7 @@ def produce_submissions(model_name, hyperparams, output_filename):
 
 
     y_pred = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test=None, submission=True)
-    
+
     submission_df = pd.DataFrame(
         {
             "Id": idxs,
