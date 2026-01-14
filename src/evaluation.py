@@ -9,7 +9,7 @@ from .utils import load_data
 from .models import train_model
 from .hyperparams_opt import optuna_hyp_opt
 
-def evaluate(models_name=['logistic_regression', 'naive_bayes', 'xgboost', 'linear_svm'], version=0):
+def evaluate(models_name=['linear_svm', 'xgboost'], version=0):
     news_df = load_data(DEVELOPMENT_PATH)
     prep = Preprocessor()
 
@@ -17,13 +17,14 @@ def evaluate(models_name=['logistic_regression', 'naive_bayes', 'xgboost', 'line
     y = news_df['y']
 
     Xtr_val, X_test, ytr_val, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=SEED)
+    
 
     print(f'Beginning shapes: \nXtr_val: {Xtr_val.shape} | X_test: {X_test.shape} | ytr_val: {ytr_val.shape} | y_test: {y_test.shape}')
 
-    Xtr_val_prep, idxs = prep.fit(Xtr_val.copy())
+    Xtr_val_prep, idxs = prep.fit_transform(Xtr_val.copy())
     ytr_val_prep = ytr_val.loc[idxs]
 
-    X_test_prep, idxs = prep.fit_transform(X_test.copy())
+    X_test_prep, idxs = prep.transform(X_test.copy())
     y_test_prep = y_test.loc[idxs]
 
     print(f'Prep shapes: \nXtr_val: {Xtr_val_prep.shape} | X_test: {X_test_prep.shape} | ytr_val: {ytr_val_prep.shape} | y_test: {y_test_prep.shape}')
@@ -60,12 +61,12 @@ def produce_submissions(model_name, hyperparams, output_filename):
 
     X_train = development.drop(columns=['y'])
     y_train = development['y']
-    X_train, idxs = prep.fit(X_train.copy())
+    X_train, idxs = prep.fit_transform(X_train.copy())
     y_train = y_train.loc[idxs]
 
     evaluation = pd.read_csv(EVALUATION_PATH, index_col=0, na_values='\\N')
 
-    X_test, idxs = prep.fit_transform(evaluation.copy())
+    X_test, idxs = prep.transform(evaluation.copy())
 
 
     y_pred = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test=None, submission=True)

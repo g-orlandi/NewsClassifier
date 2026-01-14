@@ -185,10 +185,10 @@ def optuna_hyp_opt(model, X, y, version):
 
             prep = Preprocessor()
 
-            Xtr, idxs = prep.fit(Xtr.copy())
+            Xtr, idxs = prep.fit_transform(Xtr.copy())
             ytr = ytr.loc[idxs]
 
-            Xval, idxs = prep.fit_transform(Xval.copy())
+            Xval, idxs = prep.transform(Xval.copy())
             yval = yval.loc[idxs]
 
             score_dict = train_model(model, params, Xtr, Xval, ytr, yval)

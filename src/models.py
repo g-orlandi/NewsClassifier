@@ -68,20 +68,42 @@ def classification_metric(y_true, y_pred):
 #                              MODEL WRAPPERS
 # ============================================================================
 
-def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submission=False):
-    match model_name:
-        case 'logistic_regression':
-            model = LogisticRegression(**hyperparams).fit(X_train, y_train)
-        case 'naive_bayes':
-            model = ComplementNB(**hyperparams).fit(X_train, y_train)
-        case 'xgboost':
-            model = xgb.XGBClassifier(**hyperparams)
-        case 'linear_svm':
-            model = LinearSVC(**hyperparams).fit(X_train, y_train)
-        case _:
-            raise RuntimeError(f'{model_name} is not a valid model name.')
+from sklearn.exceptions import NotFittedError
+import numpy as np
 
-    y_pred = model.predict(X_test)
+def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submission=False):
+    try:
+        match model_name:
+            case "logistic_regression":
+                model = LogisticRegression(**hyperparams)
+                model.fit(X_train, y_train)
+
+            case "naive_bayes":
+                # ComplementNB richiede X >= 0
+                if X_train.min() < 0 or X_test.min() < 0:
+                    raise ValueError("Negative values in X for ComplementNB.")
+                model = ComplementNB(**hyperparams)
+                model.fit(X_train, y_train)
+
+            case "xgboost":
+                model = xgb.XGBClassifier(**hyperparams)
+                model.fit(X_train, y_train)
+
+            case "linear_svm":
+                model = LinearSVC(**hyperparams)
+                model.fit(X_train, y_train)
+
+            case _:
+                raise RuntimeError(f"{model_name} is not a valid model name.")
+
+        y_pred = model.predict(X_test)
+
+    except (ValueError, NotFittedError, xgb.core.XGBoostError) as e:
+        if submission:
+            raise  # in submission vuoi sapere che è andato male
+        return {"f1-macro": 0.0, "error": str(e)}
+
     if submission:
         return y_pred
+
     return classification_metric(y_test, y_pred)

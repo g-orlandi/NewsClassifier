@@ -1,7 +1,7 @@
 SEED = 2026
 
-DEVELOPMENT_PATH = '../data/development.csv'
-EVALUATION_PATH = '../data/evaluation.csv'
+DEVELOPMENT_PATH = '/home/giovanni/Projects/universita/NewsClassifier/data/development.csv'
+EVALUATION_PATH = '/home/giovanni/Projects/universita/NewsClassifier/data/evaluation.csv'
 
 OPTUNA_TRIALS = 10
 OPTUNA_KSPLITS = 3
