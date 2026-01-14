@@ -54,6 +54,8 @@ class Preprocessor:
         self.df["year"] = -1
         self.df.loc[valid, "year"] = self.df.loc[valid, "timestamp"].dt.year.astype(int)
 
+    def pagerank_manegement(self):
+        self.df['page_rank'] = self.df['page_rank'].map({2:0, 3:0, 4:1, 5:2})
 
     def na_management(self): 
         null_title_idx = self.df[self.df['title'].isna()].index 
