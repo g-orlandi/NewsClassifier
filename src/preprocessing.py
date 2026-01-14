@@ -57,6 +57,7 @@ class Preprocessor:
 
     def pagerank_manegement(self):
         self.df['page_rank'] = self.df['page_rank'].map({2:0, 3:0, 4:1, 5:2})
+        self.df['page_rank'].fillna(-1)
 
     def na_management(self): 
         null_title_idx = self.df[self.df['title'].isna()].index 

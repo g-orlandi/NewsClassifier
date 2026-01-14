@@ -173,7 +173,7 @@ def optuna_hyp_opt(model, X, y, version):
 
         # Train/validation split
 
-        cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True, random_state=True)
+        cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True, random_state=SEED)
 
         scores = []
         for tr_idx, val_idx in cv.split(X, y):

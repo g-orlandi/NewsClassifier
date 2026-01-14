@@ -57,9 +57,8 @@ def classification_metric(y_true, y_pred):
     results = {
         "Precision": precision,
         "Recall": recall,
-        "Fbeta": fbeta,
+        "f1-macro": fbeta,
         "Accuracy": accuracy,
-        "f1-macro": f1_score(y_true, y_pred, average='macro')
     }
 
     return results

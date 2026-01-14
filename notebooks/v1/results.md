@@ -24,7 +24,7 @@
   - Best model on development set (F1-macro):
     - Xgboost
   - Result on public evaluation set:
-    - 0.640
+    - **0.640**
 
   - All best configs:
   {'logistic_regression': {'solver': 'saga',
