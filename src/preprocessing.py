@@ -103,9 +103,25 @@ class Preprocessor:
         return s
     
     @staticmethod
-    def clean_text(s):
-        s = s.apply(html.unescape)
-        s = s.apply(lambda x: unicodedata.normalize("NFKC", x))
+    def clean_text(s: pd.Series, *, strip_html=False) -> pd.Series:
+        TAG_RE = re.compile(r"<[^>]+>")
+
+        s = s.astype("string")  # mantiene <NA>
+        
+        # unescape HTML entities
+        s = s.map(lambda x: html.unescape(x) if pd.notna(x) else x)
+
+        # opzionale: rimuovi tag
+        if strip_html:
+            s = s.map(lambda x: TAG_RE.sub(" ", x) if pd.notna(x) else x)
+
+        # Unicode normalize
+        s = s.map(lambda x: unicodedata.normalize("NFKC", x) if pd.notna(x) else x)
+
+        # lowercase + trim + whitespace collapse
+        s = (s.str.lower()
+            .str.replace(r"\s+", " ", regex=True)
+            .str.strip())
         return s
 
     def title_management(self):
@@ -141,8 +157,86 @@ class Preprocessor:
         
         return X_ohe
 
+    def duplicates_management(self):
+        
+        def _remove_conflicts(cols):
+            for col in cols:
+                conflict_idx = (
+                    self.df.groupby(col)['y']
+                        .transform('nunique')
+                        .gt(1)
+                )
+                self.df.drop(index=self.df.index[conflict_idx], inplace=True)
+
+        def _dedup_merge(keys):
+            dup_mask = self.df.duplicated(subset=keys, keep=False)
+            groups = self.df.loc[dup_mask].groupby(keys, dropna=False)
+
+            updates = {}          # keep_idx -> dict colonne aggiornate
+            to_drop = []          # indici da droppare
+
+            for (_, y), g in groups:
+                keep_idx = g.index[0]
+                drop_idxs = g.index[1:]
+                to_drop.extend(drop_idxs)
+
+                src_nonnull = g['source'].dropna().astype(str).unique()
+                src_nonnull = sorted(src_nonnull)
+
+                # se c'è una sola source reale, la metto in 'source' e lascio 'sources' a NaN
+                if len(src_nonnull) == 1:
+                    source = src_nonnull[0]
+                    sources = pd.NA
+                else:
+                    source = pd.NA
+                    sources = src_nonnull  # lista (senza NaN)
+
+                ts = g['timestamp'].dropna()
+                timestamp = ts.min() if not ts.empty else pd.NaT
+
+                row_update = {
+                    'timestamp': timestamp,
+                    'page_rank': int(np.rint(g['page_rank'].dropna().median())) if g['page_rank'].notna().any() else pd.NA,
+                    'source': source,
+                    'sources': sources,
+                }
+                if 'title' in keys:
+                    row_update['article'] = g.loc[g['article'].str.len().idxmax(), 'article']
+
+                elif 'article' in keys:
+                    row_update['title'] = g.loc[g['title'].str.len().idxmax(), 'title']
+                else:
+                    raise RuntimeError(f"Dedup merge on invalid keys {keys}.")
+                
+                updates[keep_idx] = row_update
+
+            # crea colonna 'sources' se non esiste
+            if 'sources' not in self.df.columns:
+                self.df['sources'] = pd.NA
+
+            # applica update sulle righe tenute
+            updates_df = pd.DataFrame.from_dict(updates, orient='index')
+            self.df.loc[updates_df.index, updates_df.columns] = updates_df
+
+            # droppa le righe duplicate "in eccesso"
+            self.df.drop(index=to_drop, inplace=True)
+
+        _remove_conflicts(['article', 'title'])
+        
+        ts = self.df["timestamp"].replace("0000-00-00 00:00:00", pd.NA)
+        ts = pd.to_datetime(ts, errors="coerce")  # invalid -> NaT
+        self.df["timestamp"] = ts
+
+        _dedup_merge(['article', 'y'])
+        _dedup_merge(['title', 'y'])
+
+
     def full_prep(self,df):
         self.df = df
+        self.df['title'] = Preprocessor.clean_text(self.df['title'])
+        self.df['article'] = Preprocessor.clean_text(self.df['article'])
+        self.df.loc[self.df['article'].str.len() < 5, "article"] = pd.NA
+        self.duplicates_management()
         self.na_management()
         self.timestamp_management()
         self.pagerank_manegement()
