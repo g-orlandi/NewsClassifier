@@ -44,7 +44,7 @@
   - Best model on development set (F1-macro):
     - XGBoost
   - Result on public evaluation set:
-    - **0.644**
+    - **0.645**
 
   - All best configs:
    {'linear_svm': {'C': 6.663520926844875, 'max_iter': 5000},

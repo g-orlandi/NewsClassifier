@@ -49,7 +49,8 @@ def get_models_optuna_config(version):
 
             "linear_svm": {
                 "C": {"range": (0.1, 10.0), "type": "logfloat"},
-                "max_iter": {"fixed": 5000}
+                "max_iter": {"fixed": 5000},
+                "class_weight": {"fixed": "balanced"}
             },
 
             "xgboost": {

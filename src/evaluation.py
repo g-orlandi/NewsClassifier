@@ -82,3 +82,21 @@ def produce_submissions(model_name, hyperparams, output_filename):
     print(f'Prediction saved in {output_filename}')
 
 
+def performance(model_name, hyperparams):
+    news_df = load_data(DEVELOPMENT_PATH)
+    prep = Preprocessor()
+
+    X = news_df.drop(columns=['y'])
+    y = news_df['y']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=SEED)
+    
+    X_train, idxs = prep.fit_transform(X_train.copy())
+    y_train = y_train.loc[idxs]
+
+    X_test_prep, idxs = prep.transform(X_test.copy())
+    y_test_prep = y_test.loc[idxs]
+
+    result = train_model(model_name, hyperparams, X_train, X_test_prep, y_train, y_test_prep)
+
+    return result

@@ -17,48 +17,68 @@ the paper.
 
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 import xgboost as xgb
-from sklearn.metrics import f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import ComplementNB
 from sklearn.svm import LinearSVC
+from sklearn.metrics import (
+    precision_recall_fscore_support,
+    accuracy_score,
+    confusion_matrix,
+    balanced_accuracy_score,
+)
+
 
 # ============================================================================
 #                            METRIC COMPUTATION
 # ============================================================================
 
-def classification_metric(y_true, y_pred):
+def classification_metrics_full(y_true, y_pred, labels=None):
     """
-    Compute evaluation metrics for classification models.
+    Compute a comprehensive set of classification metrics.
 
-    Parameters
-    ----------
-    y_true : array-like
-        Ground-truth labels.
-    y_pred : array-like
-        Predicted labels.
-    model : sklearn-like estimator, optional
-        Model instance to store on disk (if requested).
-    model_file_name : str, optional
-        Filename used when saving the model.
-
-    Returns
-    -------
-    dict
-        Dictionary containing macro-averaged precision, recall, F-beta,
-        accuracy, and model complexity (if available).
+    Returns both aggregated scores and diagnostic structures.
     """
-    # Main performance metrics (macro-averaged)
-    precision, recall, fbeta, _ = precision_recall_fscore_support(
-        y_true, y_pred, average='macro', zero_division=True
+
+    # --- Global metrics ---
+    precision_macro, recall_macro, f1_macro, _ = precision_recall_fscore_support(
+        y_true, y_pred, average="macro", zero_division=0
+    )
+
+    precision_micro, recall_micro, f1_micro, _ = precision_recall_fscore_support(
+        y_true, y_pred, average="micro", zero_division=0
     )
 
     accuracy = accuracy_score(y_true, y_pred)
+    balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
 
+    # --- Per-class metrics ---
+    precision_c, recall_c, f1_c, support = precision_recall_fscore_support(
+        y_true, y_pred, average=None, zero_division=0
+    )
+
+    # --- Confusion matrix ---
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
+
+    # --- Structured output ---
     results = {
-        "Precision": precision,
-        "Recall": recall,
-        "f1-macro": fbeta,
+        # Global
+        "Precision_macro": precision_macro,
+        "Recall_macro": recall_macro,
+        "f1-macro": f1_macro,
+        "f1-micro": f1_micro,
         "Accuracy": accuracy,
+        "Balanced_accuracy": balanced_accuracy,
+
+        # Per-class
+        "Per_class": {
+            "precision": precision_c,
+            "recall": recall_c,
+            "f1": f1_c,
+            "support": support,
+        },
+
+        # Structure
+        "Confusion_matrix": cm,
     }
 
     return results
@@ -105,4 +125,4 @@ def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submi
     if submission:
         return y_pred
 
-    return classification_metric(y_test, y_pred)
+    return classification_metrics_full(y_test, y_pred)
