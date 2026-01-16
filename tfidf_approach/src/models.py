@@ -105,8 +105,11 @@ def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submi
                 model.fit(X_train, y_train)
 
             case "xgboost":
+                w = {0:1.0, 1:1.0, 2:1.0, 3:2.0, 4:1.0, 5:2.0, 6:1.5}
+                sw = y_train.map(lambda c: w[int(c)]).to_numpy()
+
                 model = xgb.XGBClassifier(**hyperparams)
-                model.fit(X_train, y_train)
+                model.fit(X_train, y_train, sample_weight=sw)
 
             case "linear_svm":
                 model = LinearSVC(**hyperparams)
@@ -119,7 +122,8 @@ def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submi
 
     except (ValueError, NotFittedError, xgb.core.XGBoostError) as e:
         if submission:
-            raise  # in submission vuoi sapere che è andato male
+            raise  
+        print(e)
         return {"f1-macro": 0.0, "error": str(e)}
 
     if submission:

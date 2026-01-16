@@ -9,9 +9,28 @@ from .utils import load_data
 from .models import train_model
 from .hyperparams_opt import optuna_hyp_opt
 
+
+def best_hyperparams(models_name=['linear_svm', 'xgboost'], version=0):
+    news_df = load_data(DEVELOPMENT_PATH)
+
+    X = news_df.drop(columns=['y'])
+    y = news_df['y']
+
+    all_hyperparams = {}
+
+    if isinstance(models_name, str):
+        models_name = [models_name]
+
+    for model_name in models_name:
+
+        hyperparams = optuna_hyp_opt(model_name, X, y, version)
+        
+        all_hyperparams[model_name] = hyperparams
+
+    return all_hyperparams
+
 def evaluate(models_name=['linear_svm', 'xgboost'], version=0):
     news_df = load_data(DEVELOPMENT_PATH)
-    prep = Preprocessor()
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
@@ -21,13 +40,6 @@ def evaluate(models_name=['linear_svm', 'xgboost'], version=0):
 
     print(f'Beginning shapes: \nXtr_val: {Xtr_val.shape} | X_test: {X_test.shape} | ytr_val: {ytr_val.shape} | y_test: {y_test.shape}')
 
-    Xtr_val_prep, idxs = prep.fit_transform(Xtr_val.copy())
-    ytr_val_prep = ytr_val.loc[idxs]
-
-    X_test_prep, idxs = prep.transform(X_test.copy())
-    y_test_prep = y_test.loc[idxs]
-
-    print(f'Prep shapes: \nXtr_val: {Xtr_val_prep.shape} | X_test: {X_test_prep.shape} | ytr_val: {ytr_val_prep.shape} | y_test: {y_test_prep.shape}')
 
     all_models_results = {}
     all_hyperparams = {}
@@ -36,13 +48,18 @@ def evaluate(models_name=['linear_svm', 'xgboost'], version=0):
         models_name = [models_name]
 
     for model_name in models_name:
-        start = time.time()
+        
+        preprocess = build_preprocess(model_name)
+        Xtr_val_prep = preprocess.fit_transform(Xtr_val)
+        X_test_prep = preprocess.transform(X_test)
 
-        # TO-DO: eventually scale
+        print(f'Prep shapes: \nXtr_val: {Xtr_val_prep.shape} | X_test: {X_test_prep.shape} | ytr_val: {ytr_val.shape} | y_test: {y_test.shape}')
+
+        start = time.time()
 
         hyperparams = optuna_hyp_opt(model_name, Xtr_val, ytr_val, version)
 
-        result = train_model(model_name, hyperparams, Xtr_val_prep, X_test_prep, ytr_val_prep, y_test_prep)
+        result = train_model(model_name, hyperparams, Xtr_val_prep, X_test_prep, ytr_val, y_test)
 
         end = time.time()
 
@@ -57,18 +74,16 @@ def evaluate(models_name=['linear_svm', 'xgboost'], version=0):
 
 def produce_submissions(model_name, hyperparams, output_filename):
     development = load_data(DEVELOPMENT_PATH)
-    prep = Preprocessor()
 
     X_train = development.drop(columns=['y'])
     y_train = development['y']
-    X_train, idxs = prep.fit_transform(X_train.copy())
-    y_train = y_train.loc[idxs]
+    X_test = pd.read_csv(EVALUATION_PATH, index_col=0, na_values='\\N')
+    X_test = initial_prep(X_test, False)
+    idxs = X_test.index
 
-    evaluation = pd.read_csv(EVALUATION_PATH, index_col=0, na_values='\\N')
-
-    X_test, idxs = prep.transform(evaluation.copy())
-
-
+    preprocess = build_preprocess(model_name)
+    X_train = preprocess.fit_transform(X_train)
+    X_test = preprocess.transform(X_test)
     y_pred = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test=None, submission=True)
 
     submission_df = pd.DataFrame(
@@ -81,22 +96,24 @@ def produce_submissions(model_name, hyperparams, output_filename):
     submission_df.to_csv(output_filename, index=False)
     print(f'Prediction saved in {output_filename}')
 
+    return submission_df
+
 
 def performance(model_name, hyperparams):
+
     news_df = load_data(DEVELOPMENT_PATH)
-    prep = Preprocessor()
+
+    preprocess = build_preprocess(model_name)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=SEED)
-    
-    X_train, idxs = prep.fit_transform(X_train.copy())
-    y_train = y_train.loc[idxs]
 
-    X_test_prep, idxs = prep.transform(X_test.copy())
-    y_test_prep = y_test.loc[idxs]
+    X_train = preprocess.fit_transform(X_train)
+    X_test = preprocess.transform(X_test)
 
-    result = train_model(model_name, hyperparams, X_train, X_test_prep, y_train, y_test_prep)
+
+    result = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test)
 
     return result

@@ -17,7 +17,7 @@ from sklearn.model_selection import StratifiedKFold
 import numpy as np
 
 from .config import *
-from .preprocessing import Preprocessor
+from .preprocessing import *
 from .models import train_model
 
 # ============================================================================
@@ -50,7 +50,7 @@ def get_models_optuna_config(version):
             "linear_svm": {
                 "C": {"range": (0.1, 10.0), "type": "logfloat"},
                 "max_iter": {"fixed": 5000},
-                "class_weight": {"fixed": "balanced"}
+                "class_weight": {"fixed": {0:1.0, 1:1.0, 2:1.0, 3:2.0, 4:1.0, 5:2.0, 6:1.5}},
             },
 
             "xgboost": {
@@ -60,18 +60,16 @@ def get_models_optuna_config(version):
                 "tree_method": {"fixed": "hist"},
                 "n_jobs": {"fixed": -1},
 
-                # pochi parametri davvero influenti
-                "learning_rate": {"range": (0.05, 0.2), "type": "logfloat"},
-                "n_estimators": {"range": [300, 500, 800], "type": "categorical"},
-                "max_depth": {"range": (3, 5), "type": "int"},
-                "min_child_weight": {"range": (1, 5), "type": "int"},
+                "learning_rate": {"range": (0.03, 0.2), "type": "logfloat"},
+                "n_estimators": {"range": [300, 600, 1000, 1500], "type": "categorical"},
+                "max_depth": {"range": (2, 4), "type": "int"},
+                "min_child_weight": {"range": (1, 20), "type": "int"},
 
-                # fissi per baseline
                 "subsample": {"fixed": 0.8},
                 "colsample_bytree": {"fixed": 0.6},
-                "gamma": {"fixed": 0.0},
-                "reg_alpha": {"fixed": 0.0},
-                "reg_lambda": {"fixed": 1.0},
+                "gamma": {"range": (0.0, 2.0), "type": "float"},
+                "reg_alpha": {"range": (1e-8, 1e-1), "type": "logfloat"},
+                "reg_lambda": {"range": (0.1, 50.0), "type": "logfloat"},
             }
         }
     if version == 1:
@@ -92,22 +90,25 @@ def get_models_optuna_config(version):
                     "tree_method": {"fixed": "hist"},
                     "n_jobs": {"fixed": -1},
 
-                    "learning_rate": {"range": (0.03, 0.15), "type": "logfloat"},
-                    "n_estimators": {"range": [300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1100, 1200], "type": "categorical"},
+                    "learning_rate": {"range": (0.03, 0.2), "type": "logfloat"},
+                    "n_estimators": {
+                        "range": [300, 400, 600, 800, 1000, 1200, 1500],
+                        "type": "categorical"
+                    },
+                    "max_depth": {"range": (2, 5), "type": "int"},
+                    "min_child_weight": {"range": (2, 6), "type": "int"},
 
-                    "max_depth": {"range": (3, 6), "type": "int"},
-                    "min_child_weight": {"range": (1, 8), "type": "int"},
+                    "subsample": {"range": (0.75, 0.95), "type": "float"},
+                    "colsample_bytree": {"range": (0.4, 0.8), "type": "float"},
 
-                    "subsample": {"range": (0.7, 1.0), "type": "float"},
-                    "colsample_bytree": {"range": (0.3, 0.9), "type": "float"},
-
-                    "gamma": {"range": (0.0, 0.7), "type": "float"},
-                    "reg_alpha": {"range": (0.0, 1.5), "type": "float"},
-                    "reg_lambda": {"range": (0.8, 4.0), "type": "float"},
+                    "gamma": {"range": (0.0, 1), "type": "float"},
+                    "reg_alpha": {"range": (0.0, 0.8), "type": "float"},
+                    "reg_lambda": {"range": (0.2, 3.0), "type": "float"},
                 },
                 "linear_svm": {
                     "C": {"range": (0.05, 10.0), "type": "logfloat"},
-                    "max_iter": {"fixed": 5000}
+                    "max_iter": {"fixed": 5000},
+                    "class_weight": {"fixed": {0:1.0, 1:1.0, 2:1.0, 3:2.0, 4:1.0, 5:2.0, 6:1.5}},
                 }
 
         }
@@ -183,14 +184,10 @@ def optuna_hyp_opt(model, X, y, version):
             ytr = y.iloc[tr_idx] if hasattr(y, "iloc") else y[tr_idx]
             yval = y.iloc[val_idx] if hasattr(y, "iloc") else y[val_idx]
 
-
-            prep = Preprocessor()
-
-            Xtr, idxs = prep.fit_transform(Xtr.copy())
-            ytr = ytr.loc[idxs]
-
-            Xval, idxs = prep.transform(Xval.copy())
-            yval = yval.loc[idxs]
+            preprocess = build_preprocess(model)
+            Xtr = preprocess.fit_transform(Xtr)
+            Xval = preprocess.transform(Xval)
+            print(Xtr.shape[1])
 
             score_dict = train_model(model, params, Xtr, Xval, ytr, yval)
 
@@ -207,6 +204,11 @@ def optuna_hyp_opt(model, X, y, version):
         sampler=optuna.samplers.TPESampler()
     )
 
-    study.optimize(objective, n_trials=OPTUNA_TRIALS, show_progress_bar=True)
+    if model == 'linear_svm':
+        optuna_trials = 10
+    elif model == 'xgboost':
+        optuna_trials = 30
+
+    study.optimize(objective, n_trials=optuna_trials, show_progress_bar=True)
 
     return study.best_trial.user_attrs["full_params"]
