@@ -77,7 +77,7 @@ def get_models_optuna_config(version):
         return {
                 "logistic_regression": {
                     "solver": {"fixed": "saga"},
-                    "C": {"range": (0.01, 10.0), "type": "logfloat"},
+                    "C": {"range": (0.001, 10.0), "type": "float"},
                     "l1_ratio": {"range": [0, 1], "type": "categorical"},
                     "max_iter": {"fixed": 10000},
                 },
@@ -107,7 +107,7 @@ def get_models_optuna_config(version):
                 },
                 "linear_svm": {
                     "C": {"range": (0.05, 10.0), "type": "logfloat"},
-                    "max_iter": {"fixed": 5000},
+                    "max_iter": {"fixed": 10000},
                     "class_weight": {"fixed": {0:1.0, 1:1.0, 2:1.0, 3:2.0, 4:1.0, 5:2.0, 6:1.5}},
                 }
 
@@ -175,7 +175,8 @@ def optuna_hyp_opt(model, X, y, version):
 
         # Train/validation split
 
-        cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True, random_state=SEED)
+        # cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True, random_state=SEED)
+        cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True)
 
         scores = []
         for tr_idx, val_idx in cv.split(X, y):
@@ -205,7 +206,7 @@ def optuna_hyp_opt(model, X, y, version):
     )
 
     if model == 'linear_svm':
-        optuna_trials = 10
+        optuna_trials = 30
     elif model == 'xgboost':
         optuna_trials = 30
 

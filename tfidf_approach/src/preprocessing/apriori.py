@@ -40,6 +40,7 @@ def remove_duplicates(df):
     return df
 
 def initial_prep(df, dev=True):
+    df.drop(columns=['page_rank', 'timestamp', 'source'])
     # Text cleaning
     df = text_cleaner_wrapper(df)
 
