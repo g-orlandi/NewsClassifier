@@ -65,16 +65,16 @@ def classification_metrics_full(y_true, y_pred, labels=None):
         "Precision_macro": precision_macro,
         "Recall_macro": recall_macro,
         "f1-macro": f1_macro,
-        "f1-micro": f1_micro,
-        "Accuracy": accuracy,
-        "Balanced_accuracy": balanced_accuracy,
+        # "f1-micro": f1_micro,
+        # "Accuracy": accuracy,
+        # "Balanced_accuracy": balanced_accuracy,
 
         # Per-class
         "Per_class": {
-            "precision": precision_c,
-            "recall": recall_c,
+            # "precision": precision_c,
+            # "recall": recall_c,
             "f1": f1_c,
-            "support": support,
+            # "support": support,
         },
 
         # Structure
@@ -112,8 +112,9 @@ def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submi
                 model.fit(X_train, y_train, sample_weight=sw)
 
             case "linear_svm":
-                model = LinearSVC(**hyperparams)
+                model = LinearSVC(**hyperparams, max_iter=5000, dual=False)
                 model.fit(X_train, y_train)
+
 
             case _:
                 raise RuntimeError(f"{model_name} is not a valid model name.")

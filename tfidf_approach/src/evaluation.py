@@ -93,7 +93,7 @@ def produce_submissions(model_name, hyperparams, output_filename):
         },
         index=idxs
     )
-    submission_df.to_csv(output_filename, index=False)
+    submission_df.to_csv(SUBMISSION_PATH + '/' + output_filename, index=False)
     print(f'Prediction saved in {output_filename}')
 
     return submission_df

@@ -6,7 +6,7 @@ from sklearn.pipeline import Pipeline
 
 from sklearn.preprocessing import StandardScaler
 
-def build_preprocess_linear():
+def build_preprocess_linear(big):
     source_ohe = OneHotEncoder(handle_unknown="ignore")
 
     title_vec = TfidfVectorizer(
@@ -27,6 +27,15 @@ def build_preprocess_linear():
         sublinear_tf=True,
     )
 
+    article_char_vec = TfidfVectorizer(
+        analyzer="char_wb",
+        ngram_range=(3, 5),
+        min_df=5,
+        max_df=0.9,
+        sublinear_tf=True,
+        norm="l2",
+    )
+    
     numeric_cols = [
         "page_rank",
         "timestamp_missing",
@@ -36,17 +45,33 @@ def build_preprocess_linear():
         "month_sin",
         "month_cos",
         "year",
+        "len_article",
+        "len_title"
     ]
+    if big:
 
-    preprocess = ColumnTransformer(
-        transformers=[
-            ("title",   title_vec,   "title"),
-            ("article", article_vec, "article"),
-            ("source",  source_ohe,  ["source"]),
-            ("num",     StandardScaler(), numeric_cols),
-        ],
-        remainder="drop",
+        preprocess = ColumnTransformer(
+            transformers=[
+                ("title_word",   title_vec,        "title"),
+                ("article_word", article_vec,      "article"),
+                ("article_char", article_char_vec, "article"),
+                ("source",       source_ohe,       ["source"]),
+                ("num",          "passthrough",    numeric_cols),
+            ],
+            remainder="drop",
+            sparse_threshold=0.3,
+        )
+    else:
+        preprocess = ColumnTransformer(
+            transformers=[
+                ("title",   title_vec,   "title"),
+                ("article", article_vec, "article"),
+                ("source",  source_ohe,  ["source"]),
+                ("num",     StandardScaler(), numeric_cols),
+            ],
+            remainder="drop",
     )
+
     return preprocess
 
 
@@ -60,17 +85,30 @@ def build_preprocess_xgb(
     source_ohe = OneHotEncoder(handle_unknown="ignore", max_categories=30)
 
     title_vec = TfidfVectorizer(
-        # ngram_range=(1, 2),
-        # min_df=7,
-        # max_df=0.8,
-        # sublinear_tf=True,
+        stop_words="english",
+        ngram_range=(1, 4),
+        min_df=2,
+        max_df=0.8,
+        norm="l2",
+        sublinear_tf=True,
     )
 
     article_vec = TfidfVectorizer(
-        # ngram_range=(1, 2),
-        # min_df=10,
-        # max_df=0.9,
-        # sublinear_tf=True,
+        stop_words="english",
+        ngram_range=(1, 3),
+        min_df=6,
+        max_df=0.9,
+        norm="l2",
+        sublinear_tf=True,
+    )
+
+    article_char_vec = TfidfVectorizer(
+        analyzer="char_wb",
+        ngram_range=(3, 5),
+        min_df=10,
+        max_df=0.9,
+        sublinear_tf=True,
+        norm="l2",
     )
 
     title_pipe = Pipeline(
@@ -83,6 +121,13 @@ def build_preprocess_xgb(
     article_pipe = Pipeline(
         steps=[
             ("tfidf", article_vec),
+            ("svd", TruncatedSVD(n_components=n_components_article)),
+        ]
+    )
+
+    article_char_pipe = Pipeline(
+        steps=[
+            ("tfidf", article_char_vec),
             ("svd", TruncatedSVD(n_components=n_components_article)),
         ]
     )
@@ -102,6 +147,7 @@ def build_preprocess_xgb(
         transformers=[
             ("title",   title_pipe,   "title"),
             ("article", article_pipe, "article"),
+            ("article_char", article_char_pipe, "article"),
             ("source",  source_ohe,  ["source"]),
             ("num",     "passthrough", numeric_cols),
         ],
@@ -157,9 +203,9 @@ def build_preprocess_nn():
     return preprocess
 
 
-def build_preprocess(model_name):
+def build_preprocess(model_name, big=False):
     if model_name == "linear_svm":
-        return build_preprocess_linear()
+        return build_preprocess_linear(big)
     elif model_name == "xgboost":
         return build_preprocess_xgb()
     elif model_name == "nn":
