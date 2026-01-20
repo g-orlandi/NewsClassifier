@@ -99,11 +99,11 @@ def produce_submissions(model_name, hyperparams, output_filename):
     return submission_df
 
 
-def performance(model_name, hyperparams):
+def performance(model_name, hyperparams, big=False):
 
     news_df = load_data(DEVELOPMENT_PATH)
 
-    preprocess = build_preprocess(model_name)
+    preprocess = build_preprocess(model_name, big)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
@@ -113,6 +113,7 @@ def performance(model_name, hyperparams):
     X_train = preprocess.fit_transform(X_train)
     X_test = preprocess.transform(X_test)
 
+    print(X_train.shape)
 
     result = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test)
 

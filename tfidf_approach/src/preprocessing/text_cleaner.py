@@ -1,5 +1,8 @@
 import re
 import html
+from nltk.stem import PorterStemmer
+
+stemmer = PorterStemmer()
 
 HTML_NOISE_WORDS = [
     "http", "https", "www", "com",
@@ -20,15 +23,23 @@ HTML_NOISE_WORDS = [
 ]
 
 
+
 def clean_text(s):
     s = s.apply(html.unescape)
     s = s.str.lower()
 
-    # rimuovi SOLO quei token come parole intere
+    # rimuovi SOLO token rumore
     pat = r"(?u)\b(" + "|".join(map(re.escape, HTML_NOISE_WORDS)) + r")\b"
     s = s.str.replace(pat, " ", regex=True)
 
-    # pulizia spazi (opzionale ma innocua)
+    # tokenizzazione semplice + stemming
+    # def stem_sentence(text):
+    #     tokens = re.findall(r"[a-z]+", text)
+    #     return " ".join(stemmer.stem(t) for t in tokens)
+
+    # s = s.apply(stem_sentence)
+
+    # normalizza spazi
     s = s.str.replace(r"\s+", " ", regex=True).str.strip()
     return s
 

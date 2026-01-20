@@ -26,6 +26,7 @@ from sklearn.metrics import (
     confusion_matrix,
     balanced_accuracy_score,
 )
+from sklearn.linear_model import SGDClassifier
 
 
 # ============================================================================
@@ -115,6 +116,15 @@ def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submi
                 model = LinearSVC(**hyperparams, max_iter=5000, dual=False)
                 model.fit(X_train, y_train)
 
+            case "sgd":
+                model = SGDClassifier(
+                    loss="hinge",          # prova anche "log_loss"
+                    alpha=1e-5,            # prova 1e-6, 1e-4
+                    max_iter=2000,
+                    class_weight="balanced",
+                    random_state=42,
+                )
+                model.fit(X_train, y_train)
 
             case _:
                 raise RuntimeError(f"{model_name} is not a valid model name.")
