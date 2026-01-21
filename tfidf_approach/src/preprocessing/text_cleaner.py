@@ -2,21 +2,25 @@ import re
 import html
 
 
-def text_cleaner_wrapper(df):
-    df["source"] = df["source"].fillna("MISSING")
+from .w2v import w2v_prep
+
+def text_cleaner_wrapper(df, is_w2v, dev):
     df["title"] = df["title"].fillna("")
     df["article"] = df["article"].fillna("")
-
-    df['title'] = clean_text(df['title'])
-    df['article'] = clean_text(df['article'])
     df['len_article'] = df['article'].str.len()
     df['len_title'] = df['title'].str.len()
-    df.loc[df['article'].str.len() < 5, "article"] = ""
     
-    df['title'] = clean_number(df['title'])
-    df['article'] = clean_number(df['article'])
+    if is_w2v:
+        return w2v_prep(df, dev)
+    else:
+        df['title'] = clean_text(df['title'])
+        df['article'] = clean_text(df['article'])
 
-    return df
+        df.loc[df['article'].str.len() < 5, "article"] = ""
+        
+        df['title'] = clean_number(df['title'])
+        df['article'] = clean_number(df['article'])
+        return df
 
 
 def clean_text(s):
@@ -41,19 +45,13 @@ def clean_text(s):
     pat = r"(?u)\b(" + "|".join(map(re.escape, HTML_NOISE_WORDS)) + r")\b"
     s = s.str.replace(pat, " ", regex=True)
 
-    # tokenizzazione semplice + stemming
-    # def stem_sentence(text):
-    #     tokens = re.findall(r"[a-z]+", text)
-    #     return " ".join(stemmer.stem(t) for t in tokens)
-
-    # s = s.apply(stem_sentence)
-
-    # normalizza spazi
     s = s.str.replace(r"\s+", " ", regex=True).str.strip()
     return s
 
 
 def clean_number(s):
+    s = s.str.replace(r"\d+", " ", regex=True)
+
     year_pattern = r"\b(?:18|19|20)\d{2}\b"
 
     pct_pattern = (

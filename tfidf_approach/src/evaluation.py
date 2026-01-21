@@ -10,8 +10,8 @@ from .models import train_model
 from .hyperparams_opt import optuna_hyp_opt
 
 
-def best_hyperparams(models_name, version):
-    news_df = load_data(DEVELOPMENT_PATH)
+def best_hyperparams(models_name, version, is_w2v):
+    news_df = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
@@ -30,8 +30,8 @@ def best_hyperparams(models_name, version):
     return all_hyperparams
 
 
-def evaluate(models_name, version):
-    news_df = load_data(DEVELOPMENT_PATH)
+def evaluate(models_name, version, is_w2v):
+    news_df = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
@@ -74,16 +74,16 @@ def evaluate(models_name, version):
     return models_results_df, all_hyperparams
 
 
-def produce_submissions(model_name, hyperparams, output_filename):
-    development = load_data(DEVELOPMENT_PATH)
+def produce_submissions(model_name, hyperparams, output_filename, big, is_w2v):
+    development = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
 
     X_train = development.drop(columns=['y'])
     y_train = development['y']
     X_test = pd.read_csv(EVALUATION_PATH, index_col=0, na_values='\\N')
-    X_test = initial_prep(X_test, False)
+    X_test = initial_prep(X_test, is_w2v=is_w2v, dev=False)
     idxs = X_test.index
 
-    preprocess = build_preprocess(model_name)
+    preprocess = build_preprocess(model_name, big)
     X_train = preprocess.fit_transform(X_train)
     X_test = preprocess.transform(X_test)
     y_pred = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test=None, submission=True)
@@ -101,11 +101,11 @@ def produce_submissions(model_name, hyperparams, output_filename):
     return submission_df
 
 
-def performance(model_name, hyperparams, big=False):
+def performance(model_name, hyperparams, is_w2v, big=False):
 
-    news_df = load_data(DEVELOPMENT_PATH)
+    news_df = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
 
-    preprocess = build_preprocess(model_name, big)
+    preprocess = build_preprocess(model_name, is_w2v=is_w2v, big=big)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']

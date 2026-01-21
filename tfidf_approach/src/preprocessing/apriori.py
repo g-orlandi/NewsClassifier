@@ -4,18 +4,23 @@ import numpy as np
 from .text_cleaner import *
 
 
-def initial_prep(df, dev=True):
+def initial_prep(df, is_w2v, dev=True):
     df.drop(columns=['page_rank', 'timestamp', 'source'])
     # Text cleaning
-    df = text_cleaner_wrapper(df)
+    df["source"] = df["source"].fillna("MISSING")
+    df["title"] = df["title"].fillna("")
+    df["article"] = df["article"].fillna("")
+    if dev:
+        df = remove_duplicates(df)
+
+    df = text_cleaner_wrapper(df, is_w2v, dev)
 
     # Timestamp formatting
     ts = df["timestamp"].replace("0000-00-00 00:00:00", pd.NA)
     ts = pd.to_datetime(ts, errors="coerce")  # invalid -> NaT
     df["timestamp"] = ts
 
-    if dev:
-        df = remove_duplicates(df)
+
 
 
     df = timestamp_features(df)
