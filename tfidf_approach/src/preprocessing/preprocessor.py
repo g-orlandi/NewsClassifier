@@ -2,11 +2,11 @@ from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import OneHotEncoder, Normalizer, MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder, Normalizer, MinMaxScaler, StandardScaler
 
 from src.config import SEED
 
-def build_preprocess(big, svd=False, nb=False):
+def _build_preprocess(big, svd=False, nb=False):
     source_ohe = OneHotEncoder(handle_unknown="ignore")
 
     title_vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 4), min_df=2,
@@ -31,7 +31,7 @@ def build_preprocess(big, svd=False, nb=False):
     if nb:
         num_scal = MinMaxScaler(clip=True)
     else:
-        num_scal = "passthrough"
+        num_scal = StandardScaler()
 
     if svd:
         title_vec = make_pipeline(
@@ -123,6 +123,6 @@ def build_preprocess(big, svd=False, nb=False):
 
 def build_preprocess(model_name, big=False):
     if model_name == 'naive_bayes':
-        return build_preprocess(big, nb=True)
+        return _build_preprocess(big, nb=True)
     else:
-        return build_preprocess(big)
+        return _build_preprocess(big)
