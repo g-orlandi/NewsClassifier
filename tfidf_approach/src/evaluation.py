@@ -10,7 +10,7 @@ from .models import train_model
 from .hyperparams_opt import optuna_hyp_opt
 
 
-def best_hyperparams(models_name=['linear_svm', 'xgboost'], version=0):
+def best_hyperparams(models_name, version):
     news_df = load_data(DEVELOPMENT_PATH)
 
     X = news_df.drop(columns=['y'])
@@ -29,7 +29,8 @@ def best_hyperparams(models_name=['linear_svm', 'xgboost'], version=0):
 
     return all_hyperparams
 
-def evaluate(models_name=['linear_svm', 'xgboost'], version=0):
+
+def evaluate(models_name, version):
     news_df = load_data(DEVELOPMENT_PATH)
 
     X = news_df.drop(columns=['y'])
@@ -71,6 +72,7 @@ def evaluate(models_name=['linear_svm', 'xgboost'], version=0):
     models_results_df = pd.DataFrame(all_models_results).T
 
     return models_results_df, all_hyperparams
+
 
 def produce_submissions(model_name, hyperparams, output_filename):
     development = load_data(DEVELOPMENT_PATH)

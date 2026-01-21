@@ -1,34 +1,43 @@
 import re
 import html
-from nltk.stem import PorterStemmer
 
-stemmer = PorterStemmer()
 
-HTML_NOISE_WORDS = [
-    "http", "https", "www", "com",
-    "rss", "feed", "feeds",
-    "img", "src", "href",
-    # "reuters", "border", "said", "new",
+def text_cleaner_wrapper(df):
+    df["source"] = df["source"].fillna("MISSING")
+    df["title"] = df["title"].fillna("")
+    df["article"] = df["article"].fillna("")
 
-    # "yahoo", "yimg", "jpg", "jpeg", "png", "gif",
-    # "width", "height", "align", "alt",
-    # "photo", "clear", "left", "right",
-    # "sig",
-    # "dailynews", "csmonitor", "feedburner",
-    # "yeartoken", 
+    df['title'] = clean_text(df['title'])
+    df['article'] = clean_text(df['article'])
+    df['len_article'] = df['article'].str.len()
+    df['len_title'] = df['title'].str.len()
+    df.loc[df['article'].str.len() < 5, "article"] = ""
+    
+    df['title'] = clean_number(df['title'])
+    df['article'] = clean_number(df['article'])
 
-    # "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
-
-    # "president", "people", "world"
-]
-
+    return df
 
 
 def clean_text(s):
     s = s.apply(html.unescape)
     s = s.str.lower()
 
-    # rimuovi SOLO token rumore
+    HTML_NOISE_WORDS = [
+        "http", "https", "www", "com",
+        "rss", "feed", "feeds",
+        "img", "src", "href",
+        # "reuters", "border", "said", "new",
+        # "yahoo", "yimg", "jpg", "jpeg", "png", "gif",
+        # "width", "height", "align", "alt",
+        # "photo", "clear", "left", "right",
+        # "sig",
+        # "dailynews", "csmonitor", "feedburner",
+        # "yeartoken", 
+        # "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+        # "president", "people", "world"
+    ]
+
     pat = r"(?u)\b(" + "|".join(map(re.escape, HTML_NOISE_WORDS)) + r")\b"
     s = s.str.replace(pat, " ", regex=True)
 
@@ -42,6 +51,7 @@ def clean_text(s):
     # normalizza spazi
     s = s.str.replace(r"\s+", " ", regex=True).str.strip()
     return s
+
 
 def clean_number(s):
     year_pattern = r"\b(?:18|19|20)\d{2}\b"
@@ -80,20 +90,3 @@ def clean_number(s):
         s = s.str.replace(pattern, token, regex=True, flags=re.IGNORECASE)
 
     return s
-
-def text_cleaner_wrapper(df):
-    df["source"] = df["source"].fillna("MISSING")
-    df["title"] = df["title"].fillna("")
-    df["article"] = df["article"].fillna("")
-
-    df['title'] = clean_text(df['title'])
-    df['article'] = clean_text(df['article'])
-    df['len_article'] = df['article'].str.len()
-    df['len_title'] = df['title'].str.len()
-    df.loc[df['article'].str.len() < 5, "article"] = ""
-    
-    df['title'] = clean_number(df['title'])
-    df['article'] = clean_number(df['article'])
-    
-
-    return df

@@ -4,6 +4,25 @@ import numpy as np
 from .text_cleaner import *
 
 
+def initial_prep(df, dev=True):
+    df.drop(columns=['page_rank', 'timestamp', 'source'])
+    # Text cleaning
+    df = text_cleaner_wrapper(df)
+
+    # Timestamp formatting
+    ts = df["timestamp"].replace("0000-00-00 00:00:00", pd.NA)
+    ts = pd.to_datetime(ts, errors="coerce")  # invalid -> NaT
+    df["timestamp"] = ts
+
+    if dev:
+        df = remove_duplicates(df)
+
+
+    df = timestamp_features(df)
+    df = map_pagerank(df)
+    return df
+
+
 def remove_duplicates(df):
     # DUPLICATES
     # If all cols match and also the target => keep only one row
@@ -39,24 +58,6 @@ def remove_duplicates(df):
     
     return df
 
-def initial_prep(df, dev=True):
-    df.drop(columns=['page_rank', 'timestamp', 'source'])
-    # Text cleaning
-    df = text_cleaner_wrapper(df)
-
-    # Timestamp formatting
-    ts = df["timestamp"].replace("0000-00-00 00:00:00", pd.NA)
-    ts = pd.to_datetime(ts, errors="coerce")  # invalid -> NaT
-    df["timestamp"] = ts
-
-    if dev:
-        df = remove_duplicates(df)
-
-
-    df = timestamp_features(df)
-    df = map_pagerank(df)
-    return df
-
 
 def timestamp_features(df):
     # 2) Missingness flag (important!)
@@ -90,8 +91,11 @@ def timestamp_features(df):
     df.loc[valid, "year"] = df.loc[valid, "timestamp"].dt.year.astype(int)
     return df
 
+
 def map_pagerank(df):
     df['page_rank'] = df['page_rank'].map({2:0, 3:0, 4:1, 5:2})
     df['page_rank'] = df['page_rank'].fillna(-1)
 
     return df
+
+
