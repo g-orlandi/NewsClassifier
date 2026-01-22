@@ -77,43 +77,7 @@ def _build_preprocess(big, svd=False, nb=False):
 
     return preprocess
 
-def _build_preprocess_w2v():
-    source_ohe = OneHotEncoder(handle_unknown="ignore", max_categories=50)
-
-    numeric_cols = [
-        "page_rank",
-        "timestamp_missing",
-        "is_weekend",
-        "hour_sin",
-        "hour_cos",
-        "month_sin",
-        "month_cos",
-        "year",
-        "len_article",
-        "len_title"
-    ]
-
-    num_scal = StandardScaler()
-
-    title_cols = [f"title_w2v_{i}" for i in range(100)]
-    article_cols = [f"article_w2v_{i}" for i in range(100)]
-
-    preprocess = ColumnTransformer(
-        transformers=[
-            ("source",  source_ohe,  ["source"]),
-            ("num",     num_scal, numeric_cols),
-            ("w2v_title", "passthrough", title_cols),
-            ("w2v_article", "passthrough", article_cols),
-        ])
-
-    return preprocess
-
-
-
-def build_preprocess(model_name, is_w2v, big=False):
-    if is_w2v:
-        return _build_preprocess_w2v()
-    
+def build_preprocess(model_name, big=False):
     if model_name == 'naive_bayes':
         return _build_preprocess(big, nb=True)
     else:

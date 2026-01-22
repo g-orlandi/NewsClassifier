@@ -37,7 +37,7 @@ def get_models_optuna_config(version):
 #                           OPTUNA OPTIMIZATION LOGIC
 # ============================================================================
 
-def optuna_hyp_opt(model, X, y, version, big, is_w2v):
+def optuna_hyp_opt(model, X, y, version, big):
     """
     Run Optuna hyperparameter optimization using the model-specific search space.
     Returns best hyperparameters found by Optuna.
@@ -85,7 +85,7 @@ def optuna_hyp_opt(model, X, y, version, big, is_w2v):
             ytr = y.iloc[tr_idx] if hasattr(y, "iloc") else y[tr_idx]
             yval = y.iloc[val_idx] if hasattr(y, "iloc") else y[val_idx]
 
-            preprocess = build_preprocess(model, is_w2v=is_w2v, big=big)
+            preprocess = build_preprocess(model, big=big)
             Xtr = preprocess.fit_transform(Xtr)
             Xval = preprocess.transform(Xval)
 

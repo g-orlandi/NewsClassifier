@@ -4,7 +4,7 @@ import numpy as np
 from .text_cleaner import *
 
 
-def initial_prep(df, is_w2v, dev=True):
+def initial_prep(df, dev=True):
     df.drop(columns=['page_rank', 'timestamp', 'source'])
     # Text cleaning
     df["source"] = df["source"].fillna("MISSING")
@@ -13,7 +13,7 @@ def initial_prep(df, is_w2v, dev=True):
     if dev:
         df = remove_duplicates(df)
 
-    df = text_cleaner_wrapper(df, is_w2v, dev)
+    df = text_cleaner_wrapper(df, dev)
 
     # Timestamp formatting
     ts = df["timestamp"].replace("0000-00-00 00:00:00", pd.NA)

@@ -10,8 +10,8 @@ from .models import train_model
 from .hyperparams_opt import optuna_hyp_opt
 
 
-def best_hyperparams(models_name, version, is_w2v, big):
-    news_df = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
+def best_hyperparams(models_name, version, big):
+    news_df = load_data(DEVELOPMENT_PATH)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
@@ -23,15 +23,15 @@ def best_hyperparams(models_name, version, is_w2v, big):
 
     for model_name in models_name:
 
-        hyperparams = optuna_hyp_opt(model_name, X, y, version, big, is_w2v)
+        hyperparams = optuna_hyp_opt(model_name, X, y, version, big)
         
         all_hyperparams[model_name] = hyperparams
 
     return all_hyperparams
 
 
-def evaluate(models_name, version, is_w2v, big):
-    news_df = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
+def evaluate(models_name, version, big):
+    news_df = load_data(DEVELOPMENT_PATH)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
@@ -50,7 +50,7 @@ def evaluate(models_name, version, is_w2v, big):
 
     for model_name in models_name:
         
-        preprocess = build_preprocess(model_name, is_w2v=is_w2v, big=big)
+        preprocess = build_preprocess(model_name, big=big)
         Xtr_val_prep = preprocess.fit_transform(Xtr_val)
         X_test_prep = preprocess.transform(X_test)
 
@@ -58,7 +58,7 @@ def evaluate(models_name, version, is_w2v, big):
 
         start = time.time()
 
-        hyperparams = optuna_hyp_opt(model_name, Xtr_val, ytr_val, version, big=big, is_w2v=is_w2v)
+        hyperparams = optuna_hyp_opt(model_name, Xtr_val, ytr_val, version, big=big)
 
         result = train_model(model_name, hyperparams, Xtr_val_prep, X_test_prep, ytr_val, y_test)
 
@@ -74,16 +74,16 @@ def evaluate(models_name, version, is_w2v, big):
     return models_results_df, all_hyperparams
 
 
-def produce_submissions(model_name, hyperparams, output_filename, big, is_w2v, calibrated=False, t0=None):
-    development = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
+def produce_submissions(model_name, hyperparams, output_filename, big, calibrated=False, t0=None):
+    development = load_data(DEVELOPMENT_PATH)
 
     X_train = development.drop(columns=['y'])
     y_train = development['y']
     X_test = pd.read_csv(EVALUATION_PATH, index_col=0, na_values='\\N')
-    X_test = initial_prep(X_test, is_w2v=is_w2v, dev=False)
+    X_test = initial_prep(X_test, dev=False)
     idxs = X_test.index
 
-    preprocess = build_preprocess(model_name, big=big, is_w2v=is_w2v)
+    preprocess = build_preprocess(model_name, big=big)
     X_train = preprocess.fit_transform(X_train)
     X_test = preprocess.transform(X_test)
 
@@ -120,11 +120,11 @@ def produce_submissions(model_name, hyperparams, output_filename, big, is_w2v, c
     return submission_df
 
 
-def performance(model_name, hyperparams, is_w2v, big=False):
+def performance(model_name, hyperparams, big=False):
 
-    news_df = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
+    news_df = load_data(DEVELOPMENT_PATH)
 
-    preprocess = build_preprocess(model_name, is_w2v=is_w2v, big=big)
+    preprocess = build_preprocess(model_name, big=big)
 
     X = news_df.drop(columns=['y'])
     y = news_df['y']
@@ -146,8 +146,8 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import f1_score
 
 
-def choose_threshold(model_name, hyperparams, is_w2v, big):
-    news_df = load_data(DEVELOPMENT_PATH, is_w2v=is_w2v)
+def choose_threshold(model_name, hyperparams, big):
+    news_df = load_data(DEVELOPMENT_PATH)
 
     X = news_df.drop(columns=["y"])
     y = news_df["y"]
@@ -158,7 +158,7 @@ def choose_threshold(model_name, hyperparams, is_w2v, big):
     )
 
     # fit preprocess SOLO su train split (no leakage)
-    preprocess = build_preprocess(model_name, is_w2v=is_w2v, big=big)
+    preprocess = build_preprocess(model_name, big=big)
     X_tr = preprocess.fit_transform(X_tr)
     X_val = preprocess.transform(X_val)
 

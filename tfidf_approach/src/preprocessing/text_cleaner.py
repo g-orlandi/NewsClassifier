@@ -2,25 +2,21 @@ import re
 import html
 
 
-from .w2v import w2v_prep
 
-def text_cleaner_wrapper(df, is_w2v, dev):
+def text_cleaner_wrapper(df):
     df["title"] = df["title"].fillna("")
     df["article"] = df["article"].fillna("")
     df['len_article'] = df['article'].str.len()
     df['len_title'] = df['title'].str.len()
-    
-    if is_w2v:
-        return w2v_prep(df, dev)
-    else:
-        df['title'] = clean_text(df['title'])
-        df['article'] = clean_text(df['article'])
 
-        # df.loc[df['article'].str.len() < 5, "article"] = ""
-        
-        df['title'] = clean_number(df['title'])
-        df['article'] = clean_number(df['article'])
-        return df
+    df['title'] = clean_text(df['title'])
+    df['article'] = clean_text(df['article'])
+
+    # df.loc[df['article'].str.len() < 5, "article"] = ""
+    
+    df['title'] = clean_number(df['title'])
+    df['article'] = clean_number(df['article'])
+    return df
 
 
 def clean_text(s):
