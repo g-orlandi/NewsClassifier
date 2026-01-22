@@ -1,4 +1,4 @@
-SEED = 2026
+SEED = 1000
 
 DEVELOPMENT_PATH = '/home/giovanni/Projects/universita/NewsClassifier/data/development.csv'
 EVALUATION_PATH = '/home/giovanni/Projects/universita/NewsClassifier/data/evaluation.csv'
@@ -6,7 +6,7 @@ EVALUATION_PATH = '/home/giovanni/Projects/universita/NewsClassifier/data/evalua
 SUBMISSION_PATH = '/home/giovanni/Projects/universita/NewsClassifier/submissions'
 
 OPTUNA_KSPLITS = 3
-OPTUNA_TRIALS = 10
+OPTUNA_TRIALS = 100
 
 HYPERPARAMS_V0 = {
     "logistic_regression": {
@@ -69,10 +69,9 @@ HYPERPARAMS_V1 = {
         "reg_lambda": {"range": (0.5, 5.0), "type": "logfloat"},
     },
     "linear_svm": {
-        "C": {"range": (0.05, 10.0), "type": "logfloat"},
-        "class_weight": {"fixed": {0:1.0, 5:1.8, 2:2.1, 1:2.2, 3:2.4, 4:2.7, 6:7.6}},
+        "C": {"range": (0.01, 0.15), "type": "logfloat"},
         "max_iter": {"fixed": 5000},
-        "dual": {"fixed": False}
+        "dual": {"fixed": True},
     },
     "sgd": {
         "loss": {
@@ -93,3 +92,27 @@ HYPERPARAMS_V1 = {
         "class_weight": {"fixed": {0:1.0, 5:1.8, 2:2.1, 1:2.2, 3:2.4, 4:2.7, 6:7.6}},
     }
 }
+
+
+CLASS_WEIGHT_CHOICES = [
+    {0:0.6,1:1.2,2:1.2,3:2.6,4:1.3,5:3.0,6:2.0},
+    {0:0.4,1:1.2,2:1.3,3:2.8,4:1.4,5:3.4,6:2.2},
+    {0:0.5,1:1.2,2:1.2,3:2.4,4:1.3,5:3.8,6:2.0},
+    {0:0.8,1:1.1,2:1.1,3:2.0,4:1.2,5:2.4,6:1.6},
+    {0:0.6,1:1.3,2:1.3,3:2.5,4:1.4,5:2.8,6:1.8},
+    {0:1.0,1:2.2,2:2.1,3:2.4,4:2.7,5:1.8,6:7.6},
+    {0:1.0,1:2.2,2:2.1,3:2.4,4:2.7,5:1.8,6:4.0},
+
+    {0:0.5,1:1.2,2:1.2,3:2.6,4:1.3,5:3.2,6:2.5},
+    {0:0.6,1:1.2,2:1.2,3:2.6,4:1.3,5:3.2,6:3.0},
+    {0:0.7,1:1.2,2:1.2,3:2.5,4:1.3,5:3.0,6:2.8},
+    {0:0.6,1:1.2,2:1.2,3:2.8,4:1.3,5:3.4,6:3.0},
+    {0:0.7,1:1.2,2:1.2,3:2.4,4:1.3,5:3.2,6:2.6},
+
+    {0:0.5,1:1.1,2:1.1,3:3.0,4:1.2,5:3.8,6:2.5},
+    {0:0.6,1:1.1,2:1.1,3:2.9,4:1.2,5:3.6,6:2.8},
+    {0:0.7,1:1.1,2:1.1,3:2.7,4:1.2,5:3.4,6:3.0},
+
+    {0:0.8,1:1.2,2:1.2,3:2.2,4:1.3,5:2.6,6:2.0},
+    {0:0.9,1:1.2,2:1.2,3:2.3,4:1.3,5:2.8,6:2.2}
+]

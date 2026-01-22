@@ -16,7 +16,7 @@ def text_cleaner_wrapper(df, is_w2v, dev):
         df['title'] = clean_text(df['title'])
         df['article'] = clean_text(df['article'])
 
-        df.loc[df['article'].str.len() < 5, "article"] = ""
+        # df.loc[df['article'].str.len() < 5, "article"] = ""
         
         df['title'] = clean_number(df['title'])
         df['article'] = clean_number(df['article'])

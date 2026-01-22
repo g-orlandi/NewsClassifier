@@ -37,7 +37,7 @@ def get_models_optuna_config(version):
 #                           OPTUNA OPTIMIZATION LOGIC
 # ============================================================================
 
-def optuna_hyp_opt(model, X, y, version):
+def optuna_hyp_opt(model, X, y, version, big, is_w2v):
     """
     Run Optuna hyperparameter optimization using the model-specific search space.
     Returns best hyperparameters found by Optuna.
@@ -72,6 +72,12 @@ def optuna_hyp_opt(model, X, y, version):
             else:
                 raise ValueError(f"Invalid parameter configuration: {key} -> {cfg}")
 
+        if model == 'linear_svm':
+            cw_id = trial.suggest_int("class_weight_id", 0, len(CLASS_WEIGHT_CHOICES)-1)
+            params["class_weight"] = CLASS_WEIGHT_CHOICES[cw_id]
+
+        params["random_state"] = SEED
+
         scores = []
         for tr_idx, val_idx in cv.split(X, y):
             Xtr = X.iloc[tr_idx] if hasattr(X, "iloc") else X[tr_idx]
@@ -79,20 +85,19 @@ def optuna_hyp_opt(model, X, y, version):
             ytr = y.iloc[tr_idx] if hasattr(y, "iloc") else y[tr_idx]
             yval = y.iloc[val_idx] if hasattr(y, "iloc") else y[val_idx]
 
-            preprocess = build_preprocess(model)
+            preprocess = build_preprocess(model, is_w2v=is_w2v, big=big)
             Xtr = preprocess.fit_transform(Xtr)
             Xval = preprocess.transform(Xval)
-            print(Xtr.shape[1])
 
             score_dict = train_model(model, params, Xtr, Xval, ytr, yval)
-
             scores.append(score_dict["f1-macro"])
 
         trial.set_user_attr("full_params", params)
-
+        print(params)
+        
         return float(np.mean(scores))
 
-    study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler())
-    study.optimize(objective, n_trials=OPTUNA_TRIALS, show_progress_bar=True)
+    study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
+    study.optimize(objective, n_trials=OPTUNA_TRIALS, show_progress_bar=True, n_jobs=4)
 
     return study.best_trial.user_attrs["full_params"]
