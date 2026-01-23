@@ -6,7 +6,7 @@ from sklearn.preprocessing import OneHotEncoder, Normalizer, MinMaxScaler, Stand
 
 from src.config import SEED
 
-def build_preprocess(model_name, big, svd=False):
+def build_preprocess(scheme, big, svd=False):
     source_ohe = OneHotEncoder(handle_unknown="ignore")
 
     title_vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=2,
@@ -21,11 +21,6 @@ def build_preprocess(model_name, big, svd=False):
     numeric_cols = [
         "page_rank",
         "timestamp_missing",
-        # "is_sunday",
-        # "hour_sin",
-        # "hour_cos",
-        # "month_sin",
-        # "month_cos",
         "year",
         "len_article",
         "len_title",
@@ -34,8 +29,16 @@ def build_preprocess(model_name, big, svd=False):
         "hour"
     ]
 
-    if model_name == 'naive_bayes':
+    if scheme == 'naive_bayes':
         num_scal = MinMaxScaler(clip=True)
+    elif scheme == 'chi2_test':
+        preprocess = ColumnTransformer(
+            transformers=[
+                ("title_word",   title_vec,        "title"),
+                ("article_word", article_vec,      "article"),
+                ("article_char", article_char_vec, "article"),
+            ])
+        return preprocess
     else:
         num_scal = StandardScaler()
 

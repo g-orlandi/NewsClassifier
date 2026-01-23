@@ -59,7 +59,8 @@ HYPERPARAMS_V1 = {
         "reg_lambda": {"range": (0.5, 5.0), "type": "logfloat"},
     },
     "linear_svm": {
-        "C": {"range": (0.01, 0.15), "type": "logfloat"},
+        # "C": {"range": (0.01, 0.15), "type": "logfloat"},
+        "C": {"range": (0.005, 3), "type": "logfloat"},
         "max_iter": {"fixed": 5000},
         "dual": {"fixed": True},
     },

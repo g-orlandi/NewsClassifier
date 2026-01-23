@@ -71,17 +71,17 @@ def timestamp_features(df):
     df.loc[valid, "is_sunday"] = (
         df.loc[valid, "timestamp"].dt.day_of_week.isin([6]).astype(int)
     )
-    df["dayofweek"] = -1
-    df.loc[valid, "dayofweek"] = df.loc[valid, "timestamp"].dt.day_of_week
+    df["dayofweek"] = 0
+    df.loc[valid, "dayofweek"] = df.loc[valid, "timestamp"].dt.day_of_week + 1
 
     # hour sin/cos
     df["hour_sin"] = 0.0
     df["hour_cos"] = 0.0
-    df["hour"] = -1
+    df["hour"] = 0
     h = df.loc[valid, "timestamp"].dt.hour.astype(float)
     df.loc[valid, "hour_sin"] = np.sin(2 * np.pi * h / 24)
     df.loc[valid, "hour_cos"] = np.cos(2 * np.pi * h / 24)
-    df.loc[valid, "hour"] = h
+    df.loc[valid, "hour"] = h + 1
 
 
     # month sin/cos
@@ -98,8 +98,8 @@ def timestamp_features(df):
     return df
 
 def map_pagerank(df):
-    df['page_rank'] = df['page_rank'].map({2:0, 3:0, 4:1, 5:2})
-    df['page_rank'] = df['page_rank'].fillna(-1)
+    df['page_rank'] = df['page_rank'].map({2:1, 3:1, 4:2, 5:3})
+    df['page_rank'] = df['page_rank'].fillna(0)
 
     return df
 

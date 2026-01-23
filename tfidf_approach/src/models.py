@@ -5,7 +5,7 @@ import xgboost as xgb
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import ComplementNB
 
-from evaluation import classification_metrics_full
+from src.evaluation import classification_metrics_full
 
 # ============================================================================
 #                              MODEL WRAPPER

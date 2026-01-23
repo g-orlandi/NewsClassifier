@@ -1,6 +1,6 @@
 import re
 import html
-
+from bs4 import BeautifulSoup
 
 def text_cleaner_wrapper(df):
     df["title"] = df["title"].fillna("")
@@ -16,6 +16,47 @@ def text_cleaner_wrapper(df):
     df['title'] = clean_number(df['title'])
     df['article'] = clean_number(df['article'])
     return df
+
+
+# URL_LIKE = re.compile(r'^\s*(https?|ftp)?\s*:\s*//', re.I)
+
+# def _strip_html_one(x: str) -> str:
+#     if x is None:
+#         return ""
+#     x = str(x)
+
+#     # se sembra un URL, non passarlo a BeautifulSoup
+#     if URL_LIKE.match(x):
+#         return x
+
+#     return BeautifulSoup(x, "html.parser").get_text(separator=" ")
+
+# def clean_text(s):
+#     s = s.apply(html.unescape)
+
+#     s = s.apply(_strip_html_one)
+#     s = s.str.lower()
+
+#     NOISE_WORDS = [
+#         "http", "https", "www", "com", "img",
+#         # "rss", "feed", "feeds",
+#         # "reuters", "border", "said", "new",
+#         # "yahoo", "yimg", "jpg", "jpeg", "png", "gif",
+#         # "width", "height", "align", "alt",
+#         # "photo", "clear", "left", "right",
+#         # "sig",
+#         # "dailynews", "csmonitor", "feedburner",
+#         # "yeartoken", 
+#         # "monday", "tuesday", "wednesday", "thursday", "friday"
+#         # "president", "people", "world"
+#     ]
+
+#     pat = r"(?u)\b(" + "|".join(map(re.escape, NOISE_WORDS)) + r")\b"
+#     s = s.str.replace(pat, " ", regex=True)
+#     s = s.str.replace(r"\s+", " ", regex=True).str.strip()
+
+#     return s
+
 
 def clean_text(s):
     s = s.apply(html.unescape)

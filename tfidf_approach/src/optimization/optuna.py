@@ -84,7 +84,7 @@ def optuna_hyp_opt(model, X, y, version, big):
             Xval = preprocess.transform(Xval)
 
             score_dict = train_model(model, params, Xtr, Xval, ytr, yval)
-            scores.append(score_dict["aggregated"]["f1macro"])
+            scores.append(score_dict["aggregated"]["f1_macro"])
 
         trial.set_user_attr("full_params", params)
         print(params)
