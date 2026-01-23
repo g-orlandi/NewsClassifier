@@ -49,4 +49,4 @@ def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submi
     if submission:
         return y_pred
     else:
-        return classification_metrics_full(y_test, y_pred)
+        return classification_metrics_full(y_test, y_pred), y_pred

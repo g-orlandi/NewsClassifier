@@ -23,8 +23,8 @@ def performance(model_name, hyperparams, big):
     X_test = preprocess.transform(X_test)
     print(X_train.shape)
 
-    result = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test)
-    return result
+    result, y_pred = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test)
+    return result, y_pred, y_test.index
 
 def produce_submissions(model_name, hyperparams, output_filename, big):
     """
