@@ -6,7 +6,7 @@ from sklearn.preprocessing import OneHotEncoder, Normalizer, MinMaxScaler, Stand
 
 from src.config import SEED
 
-def _build_preprocess(big, svd=False, nb=False):
+def build_preprocess(model_name, big, svd=False):
     source_ohe = OneHotEncoder(handle_unknown="ignore")
 
     title_vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=2,
@@ -21,17 +21,20 @@ def _build_preprocess(big, svd=False, nb=False):
     numeric_cols = [
         "page_rank",
         "timestamp_missing",
-        "is_weekend",
-        "hour_sin",
-        "hour_cos",
-        "month_sin",
-        "month_cos",
+        # "is_sunday",
+        # "hour_sin",
+        # "hour_cos",
+        # "month_sin",
+        # "month_cos",
         "year",
         "len_article",
-        "len_title"
+        "len_title",
+        "dayofweek",
+        "month",
+        "hour"
     ]
 
-    if nb:
+    if model_name == 'naive_bayes':
         num_scal = MinMaxScaler(clip=True)
     else:
         num_scal = StandardScaler()
@@ -56,8 +59,6 @@ def _build_preprocess(big, svd=False, nb=False):
         )
 
     if big:
-
-    
         preprocess = ColumnTransformer(
             transformers=[
                 ("title_word",   title_vec,        "title"),
@@ -76,9 +77,4 @@ def _build_preprocess(big, svd=False, nb=False):
             ])
 
     return preprocess
-
-def build_preprocess(model_name, big=False):
-    if model_name == 'naive_bayes':
-        return _build_preprocess(big, nb=True)
-    else:
-        return _build_preprocess(big)
+    

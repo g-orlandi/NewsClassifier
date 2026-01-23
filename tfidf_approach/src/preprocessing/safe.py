@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from .text_cleaner import *
+from .text import *
 
 
 def initial_prep(df, dev=True):
@@ -13,20 +13,16 @@ def initial_prep(df, dev=True):
     if dev:
         df = remove_duplicates(df)
 
-    df = text_cleaner_wrapper(df, dev)
+    df = text_cleaner_wrapper(df)
 
     # Timestamp formatting
     ts = df["timestamp"].replace("0000-00-00 00:00:00", pd.NA)
     ts = pd.to_datetime(ts, errors="coerce")  # invalid -> NaT
     df["timestamp"] = ts
 
-
-
-
     df = timestamp_features(df)
     df = map_pagerank(df)
     return df
-
 
 def remove_duplicates(df):
     # DUPLICATES
@@ -63,7 +59,6 @@ def remove_duplicates(df):
     
     return df
 
-
 def timestamp_features(df):
     # 2) Missingness flag (important!)
     df["timestamp_missing"] = df["timestamp"].isna().astype(int)
@@ -72,30 +67,35 @@ def timestamp_features(df):
     valid = df["timestamp"].notna()
 
     # is_weekend: keep as 0/1; set to 0 for missing (or leave NaN if you prefer)
-    df["is_weekend"] = 0
-    df.loc[valid, "is_weekend"] = (
-        df.loc[valid, "timestamp"].dt.day_of_week.isin([5, 6]).astype(int)
+    df["is_sunday"] = 0
+    df.loc[valid, "is_sunday"] = (
+        df.loc[valid, "timestamp"].dt.day_of_week.isin([6]).astype(int)
     )
+    df["dayofweek"] = -1
+    df.loc[valid, "dayofweek"] = df.loc[valid, "timestamp"].dt.day_of_week
 
     # hour sin/cos
     df["hour_sin"] = 0.0
     df["hour_cos"] = 0.0
+    df["hour"] = -1
     h = df.loc[valid, "timestamp"].dt.hour.astype(float)
     df.loc[valid, "hour_sin"] = np.sin(2 * np.pi * h / 24)
     df.loc[valid, "hour_cos"] = np.cos(2 * np.pi * h / 24)
+    df.loc[valid, "hour"] = h
+
 
     # month sin/cos
     df["month_sin"] = 0.0
     df["month_cos"] = 0.0
+    df["month"] = 0
     m = df.loc[valid, "timestamp"].dt.month.astype(float)
     df.loc[valid, "month_sin"] = np.sin(2 * np.pi * m / 12)
     df.loc[valid, "month_cos"] = np.cos(2 * np.pi * m / 12)
+    df.loc[valid, "month"] = m
 
-    # year (numeric): set to -1 for missing (or keep NaN)
     df["year"] = 0
     df.loc[valid, "year"] = df.loc[valid, "timestamp"].dt.year.astype(int)
     return df
-
 
 def map_pagerank(df):
     df['page_rank'] = df['page_rank'].map({2:0, 3:0, 4:1, 5:2})

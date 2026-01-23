@@ -1,12 +1,3 @@
-"""
-
-"""
-from sklearn.metrics import (
-    precision_recall_fscore_support,
-    confusion_matrix,
-    precision_recall_fscore_support
-)
-
 from sklearn.linear_model import SGDClassifier
 from sklearn.linear_model import RidgeClassifier
 from sklearn.svm import LinearSVC
@@ -14,42 +5,7 @@ import xgboost as xgb
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import ComplementNB
 
-
-# ============================================================================
-#                            METRIC COMPUTATION
-# ============================================================================
-
-def classification_metrics_full(y_true, y_pred, labels=None):
-    """
-    Compute a comprehensive set of classification metrics.
-    """
-
-    # Aggregated metrics
-    precision_macro, recall_macro, f1_macro, _ = precision_recall_fscore_support(
-        y_true, y_pred, average="macro", zero_division=0
-    )
-
-    # Per class metrics
-    precision_c, recall_c, f1_c, support = precision_recall_fscore_support(
-        y_true, y_pred, average=None, zero_division=0
-    )
-
-    cm = confusion_matrix(y_true, y_pred, labels=labels)
-
-    results = {
-        "precision_macro": precision_macro,
-        "recall_macro": recall_macro,
-        "f1-macro": f1_macro,
-        "per_class": {
-            "precision": precision_c,
-            "recall": recall_c,
-            "f1": f1_c,
-            "support": support,
-        },
-        "confusion_matrix": cm,
-    }
-
-    return results
+from evaluation import classification_metrics_full
 
 # ============================================================================
 #                              MODEL WRAPPER
