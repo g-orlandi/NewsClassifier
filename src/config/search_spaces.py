@@ -15,7 +15,7 @@ HYPERPARAMS_V0 = {
     },
 }
 
-HYPERPARAMS_V1 = {
+MODELS_SEARCH = {
     "logistic_regression": {
         "solver": {"fixed": "saga"},
         "penalty": {"fixed": "l2"},
