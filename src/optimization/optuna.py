@@ -14,7 +14,7 @@ from src.models import train_model
 from .params_utils import *
 
 
-def optuna_hyp_opt(model, X, y, svd=False):
+def optuna_hyp_opt(model, X, y, svd=False, all_cls=True):
     """
     Run Optuna hyperparameter optimization using the model-specific search space.
     Returns best hyperparameters found by Optuna.
@@ -25,7 +25,7 @@ def optuna_hyp_opt(model, X, y, svd=False):
     def objective(trial):
         
         pipeline_params, include_title, big, svd_params = get_params_preprocessor(trial, svd)
-        model_params = get_params_model(model, trial)
+        model_params = get_params_model(model, trial, all_cls)
 
         scores = []
         for tr_idx, val_idx in cv.split(X, y):

@@ -32,7 +32,7 @@ def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submi
         case "xgboost":
             model = xgb.XGBClassifier(**hyperparams)
             # Manual class weighting for xgboost
-            w = XGB_WEIGHTS
+            w = {0: 1.0, 2: 1.8, 1: 2.4}
             sw = y_train.map(lambda c: w[int(c)]).to_numpy()
             model.fit(X_train, y_train, sample_weight=sw)
 
