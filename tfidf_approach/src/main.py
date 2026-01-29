@@ -9,7 +9,7 @@ from src.models import train_model
 from src.optimization import optuna_hyp_opt
 
 
-def main(models_name, version, big):
+def main(models_name, version):
     """
     Complete function that:
     - perform an holdout on the DEVELOPMENT dataset (train-valid vs test)
@@ -36,24 +36,28 @@ def main(models_name, version, big):
     
     for model_name in models_name:
 
-        preprocess = build_preprocess(model_name, big=big)
-        Xtr_val_prep = preprocess.fit_transform(Xtr_val)
-        X_test_prep = preprocess.transform(X_test)
+
         
-        print(f'Prep shapes: \nXtr_val: {Xtr_val_prep.shape} | X_test: {X_test_prep.shape} | ytr_val: {ytr_val.shape} | y_test: {y_test.shape}')
 
         start = time()
 
-        hyperparams = optuna_hyp_opt(model_name, Xtr_val, ytr_val, version, big=big)
+        best_params = optuna_hyp_opt(model_name, Xtr_val, ytr_val, version)
 
-        result = train_model(model_name, hyperparams, Xtr_val_prep, X_test_prep, ytr_val, y_test)
+        # preprocess = build_preprocess(model_name, big=best_params["big"], svd=best_params["svd_params"], include_title=best_params["include_title"], config=best_params["pipeline_params"])
+        preprocess = build_preprocess(model_name, big=best_params["big"], include_title=best_params["include_title"], config=best_params["pipeline_params"])
+        
+        Xtr_val_prep = preprocess.fit_transform(Xtr_val)
+        X_test_prep = preprocess.transform(X_test)
+        print(f'Prep shapes: \nXtr_val: {Xtr_val_prep.shape} | X_test: {X_test_prep.shape} | ytr_val: {ytr_val.shape} | y_test: {y_test.shape}')
+
+        result, y_pred = train_model(model_name, best_params["model_params"], Xtr_val_prep, X_test_prep, ytr_val, y_test)
 
         end = time()
 
         result['time'] = end - start
         
         all_models_results[model_name] = result
-        all_hyperparams[model_name] = hyperparams
+        all_hyperparams[model_name] = best_params
 
     models_results_df = pd.DataFrame(all_models_results).T
 

@@ -6,18 +6,43 @@ from sklearn.preprocessing import OneHotEncoder, Normalizer, MinMaxScaler, Stand
 
 from src.config import SEED
 
-def build_preprocess(scheme, big, svd=False):
+DEFAULT_CONFIG = {
+    'title_vec': {
+        'ngram_range': (1,2),
+        'min_df': 2,
+        'max_df': 0.8,
+        'norm': 'l2',
+        'sublinear_tf': True
+    },
+    'article_vec': {
+        'ngram_range': (1,3),
+        'min_df': 6,
+        'max_df': 0.9,
+        'norm': 'l2',
+        'sublinear_tf': True 
+    },
+    'article_char_vec': {
+        'ngram_range': (3,5),
+        'min_df': 5,
+        'max_df': 0.9,
+        'norm': 'l2',
+        'sublinear_tf': True
+    }
+}
+
+def build_preprocess(scheme, big, svd=None, include_title=True, config=DEFAULT_CONFIG):
     source_ohe = OneHotEncoder(handle_unknown="ignore")
 
-    title_vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=2,
-        max_df=0.8, norm="l2", sublinear_tf=True)
+    title_conf = config["title_vec"]
+    article_vec_conf = config["article_vec"]
+    article_char_conf = config["article_char_vec"]
 
-    article_vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 3), min_df=6, 
-        max_df=0.9, norm="l2", sublinear_tf=True)
+    title_vec = TfidfVectorizer(**title_conf, stop_words="english")
+
+    article_vec = TfidfVectorizer(**article_vec_conf, stop_words="english")
     
-    article_char_vec = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), min_df=5, 
-        max_df=0.9, sublinear_tf=True, norm="l2")
-    
+    article_char_vec = TfidfVectorizer(**article_char_conf, analyzer="char_wb")
+        
     numeric_cols = [
         "page_rank",
         "timestamp_missing",
@@ -31,18 +56,13 @@ def build_preprocess(scheme, big, svd=False):
 
     if scheme == 'naive_bayes':
         num_scal = MinMaxScaler(clip=True)
-    elif scheme == 'chi2_test':
-        preprocess = ColumnTransformer(
-            transformers=[
-                ("title_word",   title_vec,        "title"),
-                ("article_word", article_vec,      "article"),
-                ("article_char", article_char_vec, "article"),
-            ])
-        return preprocess
     else:
         num_scal = StandardScaler()
 
-    if svd:
+    if svd is not None:
+
+        source_ohe = OneHotEncoder(max_categories=svd['source_cat'], handle_unknown="ignore")
+    
         title_vec = make_pipeline(
             title_vec,
             TruncatedSVD(n_components=svd['k_title'], random_state=SEED),
@@ -61,23 +81,20 @@ def build_preprocess(scheme, big, svd=False):
             Normalizer(copy=False),
         )
 
-    if big:
-        preprocess = ColumnTransformer(
-            transformers=[
-                ("title_word",   title_vec,        "title"),
-                ("article_word", article_vec,      "article"),
-                ("article_char", article_char_vec, "article"),
-                ("source",       source_ohe,       ["source"]),
-                ("num",          num_scal,    numeric_cols),
-            ])
-    else:
-        preprocess = ColumnTransformer(
-            transformers=[
-                ("title",   title_vec,   "title"),
-                ("article", article_vec, "article"),
+    steps = [   ("article", article_vec, "article"),
                 ("source",  source_ohe,  ["source"]),
-                ("num",     num_scal, numeric_cols),
-            ])
+                ("num",     num_scal, numeric_cols)]
 
+    if include_title:
+        title_vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=2, 
+                                    max_df=0.8, norm="l2", sublinear_tf=True)
+        steps.append(("title", title_vec, "title"))
+
+    if big:
+        steps.append(("article_char", article_char_vec, "article"))
+
+    preprocess = ColumnTransformer(
+        transformers=steps
+    )
     return preprocess
     
