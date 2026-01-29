@@ -25,15 +25,13 @@ def initial_prep(df, dev=True):
     df["title"] = df["title"].fillna("")
     df["article"] = df["article"].fillna("")
     
+    ts = pd.to_datetime(df['timestamp'], errors="coerce") 
+    df["timestamp"] = ts
+    
     if dev:
         df = remove_duplicates(df)
 
     df = text_cleaner_wrapper(df)
-
-    # Timestamp formatting
-    ts = pd.to_datetime(ts, errors="coerce") 
-    df["timestamp"] = ts
-
     df = timestamp_features(df)
     df = map_pagerank(df)
     return df
