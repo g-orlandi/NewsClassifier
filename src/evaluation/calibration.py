@@ -67,7 +67,7 @@ def produce_calibrated_submissions(model_name, hyperparams, output_filename, big
     X_train = development.drop(columns=["y"])
     y_train = development["y"]
 
-    X_test = pd.read_csv(EVALUATION_PATH, index_col=0, na_values=NAN_PATTERN)
+    X_test = pd.read_csv(EVALUATION_PATH, index_col=0, na_values=NAN_PATTERNS)
     X_test = initial_prep(X_test, dev=False)
     idxs = X_test.index
 

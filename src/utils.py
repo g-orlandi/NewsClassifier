@@ -16,7 +16,7 @@ def load_data(path):
     Used only for load development dataset.
     """
 
-    df = pd.read_csv(path, index_col=0, na_values=NAN_PATTERN)
+    df = pd.read_csv(path, index_col=0, na_values=NAN_PATTERNS)
     df["y"] = df["label"]
     df.drop(columns="label", inplace=True)
 
