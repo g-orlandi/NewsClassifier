@@ -1,5 +1,5 @@
 """
-Hyperparameters search and Optuna optimization utilities.
+Hyperparameters optimizer with Optuna.
 This implementation support both the optimization of models' hyperparameters and also the params of the
 preprocessor. 
 """
@@ -14,7 +14,7 @@ from src.models import train_model
 from .params_utils import *
 
 
-def optuna_hyp_opt(model, X, y, svd=False, all_cls=True):
+def optuna_hyp_opt(model, X, y, svd=False, all_cls=True, also_pipe=False, also_weights=False):
     """
     Run Optuna hyperparameter optimization using the model-specific search space.
     Returns best hyperparameters found by Optuna.
@@ -23,9 +23,15 @@ def optuna_hyp_opt(model, X, y, svd=False, all_cls=True):
     cv = StratifiedKFold(n_splits=OPTUNA_KSPLITS, shuffle=True, random_state=SEED)
 
     def objective(trial):
-        
-        pipeline_params, include_title, big, svd_params = get_params_preprocessor(trial, svd)
-        model_params = get_params_model(model, trial, all_cls)
+        if also_pipe:
+            pipeline_params, include_title, big, svd_params = get_params_preprocessor(trial, svd)
+        else:
+            big = True
+            include_title = True
+            pipeline_params = DEFAULT_PIPELINE_CONFIG
+            svd_params = None
+
+        model_params = get_params_model(model, trial, all_cls, also_weights)
 
         scores = []
         for tr_idx, val_idx in cv.split(X, y):
@@ -53,5 +59,5 @@ def optuna_hyp_opt(model, X, y, svd=False, all_cls=True):
         return float(np.mean(scores))
 
     study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
-    study.optimize(objective, n_trials=OPTUNA_TRIALS, show_progress_bar=True, n_jobs=16)
+    study.optimize(objective, n_trials=OPTUNA_TRIALS, show_progress_bar=True, n_jobs=8)
     return study.best_trial.user_attrs["full_params"]

@@ -18,7 +18,7 @@ from src.models import train_model
 from src.optimization import optuna_hyp_opt
 
 
-def optimize_and_evaluate(models_name):
+def optimize_and_evaluate(models_name, also_weights=False, svd=False, all_cls=True, also_pipe=False):
     """
     Complete function that:
     - perform an holdout on the DEVELOPMENT dataset (train-valid vs test)
@@ -38,7 +38,7 @@ def optimize_and_evaluate(models_name):
     
     for model_name in models_name:
         start = time()
-        best_params = optuna_hyp_opt(model_name, Xtr_val, ytr_val)
+        best_params = optuna_hyp_opt(model_name, Xtr_val, ytr_val, also_weights=also_weights)
 
         preprocess = build_preprocess(model_name, big=best_params["big"], include_title=best_params["include_title"], config=best_params["pipeline_params"])
     
@@ -53,12 +53,15 @@ def optimize_and_evaluate(models_name):
         
         all_models_results[model_name] = result
         all_hyperparams[model_name] = best_params
+        print(model_name)
+        print(result)
+        print(best_params["model_params"])
 
     models_results_df = pd.DataFrame(all_models_results).T
 
     return models_results_df, all_hyperparams
 
-def performance(model_name, hyperparams, big):
+def performance(model_name, hyperparams, big, include_title):
     """
     Given a single model name and a dict with the params,
     it returns the performance computed on a single holdout split, only on the DEVELOPMENT dataset.
@@ -68,7 +71,7 @@ def performance(model_name, hyperparams, big):
     y = news_df['y']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=SEED)
 
-    preprocess = build_preprocess(model_name, big=big)
+    preprocess = build_preprocess(model_name, big=big, include_title=include_title)
     X_train = preprocess.fit_transform(X_train)
     X_test = preprocess.transform(X_test)
     print(f'X_train shape after prep: {X_train.shape}')
@@ -76,7 +79,7 @@ def performance(model_name, hyperparams, big):
     result, y_pred = train_model(model_name, hyperparams, X_train, X_test, y_train, y_test)
     return result, y_pred, y_test.index
 
-def produce_submissions(model_name, hyperparams, big, output_filename):
+def produce_submissions(model_name, hyperparams, big, include_title, output_filename):
     """
     Given a single model and a parameter grid, it trains the model on the whole DEVELOPMENT dataset
     and produce prediciton for the EVALUATION dataset; it stores these predictions on 'output_filename'. 
@@ -88,7 +91,7 @@ def produce_submissions(model_name, hyperparams, big, output_filename):
     X_test = initial_prep(X_test, dev=False)
     idxs = X_test.index
 
-    preprocess = build_preprocess(model_name, big=big)
+    preprocess = build_preprocess(model_name, big=big, include_title=include_title)
     X_train = preprocess.fit_transform(X_train)
     X_test = preprocess.transform(X_test)
 

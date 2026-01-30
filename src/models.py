@@ -8,7 +8,6 @@ from sklearn.naive_bayes import ComplementNB
 import xgboost as xgb
 
 from src.evaluation import classification_metrics_full
-from .config import XGB_WEIGHTS
 
 
 def train_model(model_name, hyperparams, X_train, X_test, y_train, y_test, submission=False):

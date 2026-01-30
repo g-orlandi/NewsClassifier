@@ -9,24 +9,25 @@ Hyperparameter search spaces and shared tuning presets.
 MODELS_SEARCH = {
     "logistic_regression": {
         "solver": {"fixed": "saga"},
-        "penalty": {"fixed": "l2"},
-        "C": {"range": (0.05, 8.0), "type": "logfloat"},
+        "l1_ratio": {"range": [0, 1], "type": "categorical"},
+        "C": {"range": (0.005, 5), "type": "logfloat"},
         "tol": {"range": [1e-2, 1e-3], "type":"categorical"},
-        "max_iter": {"fixed": 2000},
+        "max_iter": {"fixed": 3000},
         "class_weight": {"fixed": {0:1.0, 5:1.8, 2:2.1, 1:2.2, 3:2.4, 4:2.7, 6:7.6}},
     },
     "naive_bayes": {
         "alpha": {"range": (1e-3, 10.0), "type": "logfloat"}
     },
     "linear_svm": {
-        # "C": {"range": (0.01, 0.15), "type": "logfloat"},
-        "C": {"range": (0.005, 3), "type": "logfloat"},
+        # "C": {"range": (0.005, 2), "type": "logfloat"},
+        "C": {"range": (0.005, 0.15), "type": "logfloat"},
         "max_iter": {"fixed": 5000},
         "dual": {"fixed": True},
+        "class_weight": {"fixed": {0: 1.0, 1: 2.2, 2: 2.1, 3: 2.4, 4: 2.7, 5: 1.8, 6: 7.6}}
     },
     "sgd": {
         "loss": {"range": ["hinge", "log_loss"], "type": "categorical"},
-
+        "class_weight": {"fixed": {0: 1.0, 1: 2.2, 2: 2.1, 3: 2.4, 4: 2.7, 5: 1.8, 6: 7.6}},
         # regolarizzazione (alpha è la più importante)
         "alpha": {"range": (1e-6, 1e-3), "type": "logfloat"},
         "penalty": {"fixed": "l2"},

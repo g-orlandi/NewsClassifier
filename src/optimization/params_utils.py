@@ -72,7 +72,7 @@ def get_generic_params(param_config, trial, prefix=""):
 
     return params
 
-def get_params_model(model, trial, all_cls):
+def get_params_model(model, trial, all_cls, also_weights):
     """
     Sample hyperparameters for a specific model.
     Also handles class weights for linear SVM and SGD
@@ -81,15 +81,17 @@ def get_params_model(model, trial, all_cls):
     param_config = MODELS_SEARCH[model]
 
     params = get_generic_params(param_config, trial)
-    if model == 'linear_svm' or model == 'sgd':
+    # if model == 'linear_svm' or model == 'sgd':
+    if also_weights:
         if all_cls:
             cw = ALL_CLASS_WEIGHT_CHOICES
         else:
             cw = CLASS_WEIGHT_CHOICES
         cw_id = trial.suggest_int("class_weight_id", 0, len(cw)-1)
         params["class_weight"] = cw[cw_id]
-
-    params["random_state"] = SEED
+    
+    if model != 'naive_bayes':
+        params["random_state"] = SEED
 
     return params
 
