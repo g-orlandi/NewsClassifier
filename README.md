@@ -16,7 +16,7 @@ Date: 2026-01-31
 
 ## Introduction
 
-The goal of this project is to address a news article classification task, as described in the official [assignment](docs/DS_ML_Lab__Project_Assignment_Winter_2026).
+The goal of this project is to address a news article classification task, as described in the official [assignment](docs/DS_ML_Lab__Project_Assignment_Winter_2026.pdf).
 
 The task is approached using a classical NLP pipeline based on TF–IDF representations and linear classifiers, with extensive hyperparameter optimization.
 
