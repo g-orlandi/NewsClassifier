@@ -8,6 +8,7 @@ Date: 2026-01-31
 ## Contents of this page
 
 - [Introduction](#introduction)
+- [Important notes](#important-notes)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Structure](#structure)
@@ -21,6 +22,16 @@ The goal of this project is to address a news article classification task, as de
 The task is approached using a classical NLP pipeline based on TF–IDF representations and linear classifiers, with extensive hyperparameter optimization.
 
 A detailed description of the methodology, experimental setup and results is provided in the final [report](docs/report.pdf).
+
+---
+
+## Important notes
+
+Experimental results are reported in the notebooks section ([notebooks/](notebooks/)), in particular in the [models_test/](notebooks/models_test/) directory.  
+Additional experimental results, exploratory analyses, and intermediate ideas are also available in the notebooks, although they may be less structured.
+
+As a clear entry point for reproducing the experimental results, please refer to the [Usage](#usage) section.
+In any case, each function and module is documented within its corresponding file.
 
 ---
 
@@ -131,6 +142,7 @@ Output:
 
 ## Structure
 
+```
 .
 ├── data/                 # datasets used in the task
 ├── docs/                 # assignment and final report pdfs
@@ -159,3 +171,4 @@ Output:
 │   ├── utils.py           # utility functions used across the project
 │   └── requirements.txt
 └── submissions/          # leaderboard submissions
+```
