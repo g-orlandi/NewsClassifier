@@ -38,9 +38,9 @@ def optimize_and_evaluate(models_name, also_weights=False, svd=False, all_cls=Tr
     
     for model_name in models_name:
         start = time()
-        best_params = optuna_hyp_opt(model_name, Xtr_val, ytr_val, also_weights=also_weights)
+        best_params = optuna_hyp_opt(model_name, Xtr_val, ytr_val, also_weights=also_weights, svd=svd, all_cls=all_cls, also_pipe=also_pipe)
 
-        preprocess = build_preprocess(model_name, big=best_params["big"], include_title=best_params["include_title"], config=best_params["pipeline_params"])
+        preprocess = build_preprocess(model_name, svd=best_params["svd_params"], big=best_params["big"], include_title=best_params["include_title"], config=best_params["pipeline_params"])
     
         print(f'Beginning shapes: \nXtr_val: {Xtr_val.shape} | X_test: {X_test.shape} | ytr_val: {ytr_val.shape} | y_test: {y_test.shape}')
         Xtr_val_prep = preprocess.fit_transform(Xtr_val)

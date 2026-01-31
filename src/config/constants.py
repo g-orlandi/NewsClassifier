@@ -12,8 +12,8 @@ EVALUATION_PATH = "/home/giovanni/Projects/universita/NewsClassifier/data/evalua
 SUBMISSION_PATH = "/home/giovanni/Projects/universita/NewsClassifier/submissions"
 
 # Optuna settings
-OPTUNA_KSPLITS = 3
-OPTUNA_TRIALS = 100
+OPTUNA_KSPLITS = 2
+OPTUNA_TRIALS = 2
 
 # Missing value pattern used in CSV files
 NAN_PATTERNS = ["\\N", "0000-00-00 00:00:00"]
