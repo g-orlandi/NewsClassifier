@@ -28,19 +28,13 @@ MODELS_SEARCH = {
     "sgd": {
         "loss": {"range": ["hinge", "log_loss"], "type": "categorical"},
         "class_weight": {"fixed": {0: 1.0, 1: 2.2, 2: 2.1, 3: 2.4, 4: 2.7, 5: 1.8, 6: 7.6}},
-        # regolarizzazione (alpha è la più importante)
         "alpha": {"range": (1e-6, 1e-3), "type": "logfloat"},
         "penalty": {"fixed": "l2"},
-
-        # ottimizzazione
         "learning_rate": {"range": ["optimal", "adaptive"], "type": "categorical"},
         "eta0": {"range": (1e-3, 1e-1), "type": "logfloat"},     # usata se adaptive
         "average": {"range": [True, False], "type": "categorical"},
-
         "max_iter": {"fixed": 3000},
         "tol": {"range": (1e-5, 1e-3), "type": "logfloat"},
-
-        # opzionale ma spesso utile
         "early_stopping": {"range": [True, False], "type": "categorical"},
         "n_iter_no_change": {"range": [5, 10], "type": "categorical"},
     },
@@ -113,7 +107,7 @@ PREP_SEARCH = {
 
   "article_vec": {
     "ngram_range": {"range": ["1,2", "1,3"], "type": "categorical"},
-    "min_df": {"range": [2, 3, 6], "type": "categorical"},      # 2 è spesso il boost per 3/5
+    "min_df": {"range": [2, 3, 6], "type": "categorical"},    
     "max_df": {"range": [0.8, 0.9], "type": "categorical"},
     "sublinear_tf": {"fixed": True},
     "norm": {"fixed": "l2"},
@@ -137,5 +131,5 @@ SVD_SEARCH = {
   "k_title":   {"range": [50,  100, 200], "type": "categorical"},
   "k_article": {"range": [200, 300, 400], "type": "categorical"},
   "k_char":    {"range": [100, 150, 200, 350], "type": "categorical"},
-  "source_cat":{"range": [2, 20, 50], "type": "categorical"},   # 0 = off
+  "source_cat":{"range": [2, 20, 50], "type": "categorical"},   
 }
