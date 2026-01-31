@@ -31,7 +31,7 @@ MODELS_SEARCH = {
         "alpha": {"range": (1e-6, 1e-3), "type": "logfloat"},
         "penalty": {"fixed": "l2"},
         "learning_rate": {"range": ["optimal", "adaptive"], "type": "categorical"},
-        "eta0": {"range": (1e-3, 1e-1), "type": "logfloat"},     # usata se adaptive
+        "eta0": {"range": (1e-3, 1e-1), "type": "logfloat"},     
         "average": {"range": [True, False], "type": "categorical"},
         "max_iter": {"fixed": 3000},
         "tol": {"range": (1e-5, 1e-3), "type": "logfloat"},
