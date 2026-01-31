@@ -51,7 +51,7 @@ source ~/.virtualenvs/news_clf/bin/activate
 
 ```bash
 cd news_classifier/
-git clone git@gitlab.com:univeristy3/observa.git
+git clone git@github.com:g-orlandi/NewsClassifier.git
 ```
 
 4. Update the virtualenv:
@@ -65,6 +65,8 @@ pip install -r src/requirements.txt
 ## Usage
 
 The main entry points of the project are defined in [run.py](src/evaluation/run.py).
+
+> NOTE: Any configuration not provided via function parameters can be modified directly in the [config/](src/config/) directory.
 
 #### optimize_and_evaluate
 
@@ -97,7 +99,8 @@ the corresponding performance.
 Parameters:
 - **model_name**: identifier of the model to evaluate
 - **hyperparams**: dictionary of fixed model hyperparameters
-- **prep_params**: TF–IDF preprocessing parameters
+- **include_title**: whether to include the title
+- **big**: whether to include char analyzer on article
 
 Output:
 - evaluation metrics
@@ -117,7 +120,8 @@ used for leaderboard submission.
 Parameters:
 - **model_name**: identifier of the model
 - **hyperparams**: dictionary of model hyperparameters
-- **prep_params**: TF–IDF preprocessing parameters
+- **include_title**: whether to include the title
+- **big**: whether to include char analyzer on article
 - **output_filename**: path to the output file
 
 Output:
